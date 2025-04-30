@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lost & Found Analytics Dashboard</title>
+    <link rel="icon" type="image/png" href="/LNF.jpg">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <style>
+        :root {
+            --primary: #4834d4;
+            --primary-light: #686de0;
+            --primary-dark: #3525b0;
+            --secondary: #6ab04c;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --success: #2ecc71;
+            --info: #3498db;
+            --dark: #2d3436;
+            --light: #f8f9fa;
+            --text: #2d3436;
+            --text-light: #636e72;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.5;
+            background-color: #f5f6fa;
+            color: var(--text);
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .dashboard {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-card-title {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card-change {
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .change-positive {
+            color: var(--success);
+        }
+
+        .change-negative {
+            color: var(--danger);
+        }
+
+        .change-neutral {
+            color: var(--text-light);
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .chart-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .chart-card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        .recent-activity {
+            background-color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .activity-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .activity-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .activity-table th {
+            text-align: left;
+            padding: 0.75rem;
+            background-color: var(--light);
+            color: var(--text-light);
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        .activity-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #eee;
+            font-size: 0.875rem;
+        }
+
+        .activity-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-lost {
+            background-color: #ffeaa7;
+            color: #d35400;
+        }
+
+        .badge-found {
+            background-color: #55efc4;
+            color: #006266;
+        }
+
+        .badge-claimed {
+            background-color: #a5b1c2;
+            color: #2d3436;
+        }
+
+        .time-period-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .time-btn {
+            padding: 0.5rem 1rem;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .time-btn.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .time-btn:hover {
+            background-color: #f5f6fa;
+        }
+
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard {
+                padding: 0 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="header-title">LOST & FOUND ANALYTICAL DASHBOARD</h1>
+    </header>
+
+    <div class="dashboard">
+        <div class="time-period-selector">
+            <button class="time-btn active" onclick="changeTimePeriod('week')">This Week</button>
+            <button class="time-btn" onclick="changeTimePeriod('month')">This Month</button>
+            <button class="time-btn" onclick="changeTimePeriod('quarter')">This Quarter</button>
+            <button class="time-btn" onclick="changeTimePeriod('year')">This Year</button>
+            <button class="time-btn" onclick="changeTimePeriod('all')">All Time</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-card-title">Total Items</span>
+                <span class="stat-card-value" id="totalItems">0</span>
+                <span class="stat-card-change change-positive" id="totalItemsChange">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="17 11 12 6 7 11"></polyline>
+                        <polyline points="17 18 12 13 7 18"></polyline>
+                    </svg>
+                    <span>0% from last period</span>
+                </span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-card-title">Lost Items</span>
+                <span class="stat-card-value" id="lostItems">0</span>
+                <span class="stat-card-change change-positive" id="lostItemsChange">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="17 11 12 6 7 11"></polyline>
+                        <polyline points="17 18 12 13 7 18"></polyline>
+                    </svg>
+                    <span>0% from last period</span>
+                </span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-card-title">Found Items</span>
+                <span class="stat-card-value" id="foundItems">0</span>
+                <span class="stat-card-change change-positive" id="foundItemsChange">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="17 11 12 6 7 11"></polyline>
+                        <polyline points="17 18 12 13 7 18"></polyline>
+                    </svg>
+                    <span>0% from last period</span>
+                </span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-card-title">Claim Rate</span>
+                <span class="stat-card-value" id="claimRate">0%</span>
+                <span class="stat-card-change change-positive" id="claimRateChange">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="17 11 12 6 7 11"></polyline>
+                        <polyline points="17 18 12 13 7 18"></polyline>
+                    </svg>
+                    <span>0% from last period</span>
+                </span>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-card-header">
+                    <h3 class="chart-card-title">Items by Type</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="typeChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-card-header">
+                    <h3 class="chart-card-title">Items by Category</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-card-header">
+                    <h3 class="chart-card-title">Items by Status</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-card-header">
+                    <h3 class="chart-card-title">Items Over Time</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="timelineChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="recent-activity">
+            <h3 class="activity-title">Recent Activity</h3>
+            <table class="activity-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Item</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Location</th>
+                    </tr>
+                </thead>
+                <tbody id="recentActivityBody">
+                    <!-- Will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCOZZ44tcqI8TPCXK6SzT7tURKM01j7efo",
+            authDomain: "lostnfounditemlostdb.firebaseapp.com",
+            databaseURL: "https://lostnfounditemlostdb-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "lostnfounditemlostdb",
+            storageBucket: "lostnfounditemlostdb.appspot.com",
+            messagingSenderId: "494153480103",
+            appId: "1:494153480103:web:e04aef1eab4e89cdb5a882"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Global variables
+        let allItems = [];
+        let currentTimePeriod = 'week';
+        let typeChart, categoryChart, statusChart, timelineChart;
+
+        // Initialize charts
+        function initCharts() {
+            // Type Chart (Doughnut)
+            const typeCtx = document.getElementById('typeChart').getContext('2d');
+            typeChart = new Chart(typeCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Lost', 'Found'],
+                    datasets: [{
+                        data: [0, 0],
+                        backgroundColor: [
+                            '#f39c12',
+                            '#2ecc71'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        datalabels: {
+                            formatter: (value, ctx) => {
+                                let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                let percentage = (value * 100 / sum).toFixed(1) + '%';
+                                return percentage;
+                            },
+                            color: '#fff',
+                            font: {
+                                weight: 'bold'
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+
+            // Category Chart (Bar)
+            const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+            categoryChart = new Chart(categoryCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Items',
+                        data: [],
+                        backgroundColor: '#4834d4',
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            // Status Chart (Pie)
+            const statusCtx = document.getElementById('statusChart').getContext('2d');
+            statusChart = new Chart(statusCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Unclaimed', 'Claimed'],
+                    datasets: [{
+                        data: [0, 0],
+                        backgroundColor: [
+                            '#f39c12',
+                            '#2ecc71'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        datalabels: {
+                            formatter: (value, ctx) => {
+                                let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                let percentage = (value * 100 / sum).toFixed(1) + '%';
+                                return percentage;
+                            },
+                            color: '#fff',
+                            font: {
+                                weight: 'bold'
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+
+            // Timeline Chart (Line)
+            const timelineCtx = document.getElementById('timelineChart').getContext('2d');
+            timelineChart = new Chart(timelineCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Lost Items',
+                            data: [],
+                            borderColor: '#f39c12',
+                            backgroundColor: 'rgba(243, 156, 18, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'Found Items',
+                            data: [],
+                            borderColor: '#2ecc71',
+                            backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Load data from Firebase with proper claimed item tracking
+        function loadData() {
+            const lostItemsRef = ref(db, 'lostItems');
+            const foundItemsRef = ref(db, 'foundItems');
+            const claimedItemsRef = ref(db, 'claimedItems');
+
+            onValue(lostItemsRef, (lostSnapshot) => {
+                onValue(foundItemsRef, (foundSnapshot) => {
+                    onValue(claimedItemsRef, (claimedSnapshot) => {
+                        allItems = [];
+                        const claimedIds = new Set();
+                        
+                        // First collect all claimed item IDs
+                        if (claimedSnapshot.exists()) {
+                            claimedSnapshot.forEach((childSnapshot) => {
+                                const claimedItem = childSnapshot.val();
+                                if (claimedItem.originalId) {
+                                    claimedIds.add(claimedItem.originalId);
+                                }
+                            });
+                        }
+                        
+                        // Process lost items (only unclaimed)
+                        if (lostSnapshot.exists()) {
+                            lostSnapshot.forEach((childSnapshot) => {
+                                const item = childSnapshot.val();
+                                if (!claimedIds.has(childSnapshot.key)) {
+                                    item.id = childSnapshot.key;
+                                    item.type = 'lost';
+                                    item.status = 'unclaimed';
+                                    allItems.push(item);
+                                }
+                            });
+                        }
+                        
+                        // Process found items (only unclaimed)
+                        if (foundSnapshot.exists()) {
+                            foundSnapshot.forEach((childSnapshot) => {
+                                const item = childSnapshot.val();
+                                if (!claimedIds.has(childSnapshot.key)) {
+                                    item.id = childSnapshot.key;
+                                    item.type = 'found';
+                                    item.status = 'unclaimed';
+                                    allItems.push(item);
+                                }
+                            });
+                        }
+                        
+                        // Process claimed items
+                        if (claimedSnapshot.exists()) {
+                            claimedSnapshot.forEach((childSnapshot) => {
+                                const item = childSnapshot.val();
+                                item.id = childSnapshot.key;
+                                item.type = item.originalType || 'unknown';
+                                item.status = 'claimed';
+                                allItems.push(item);
+                            });
+                        }
+
+                        updateAnalytics();
+                    });
+                });
+            });
+        }
+
+        // Update analytics with accurate counts
+        function updateAnalytics() {
+            // Filter items based on time period
+            let filteredItems = filterItemsByTimePeriod(allItems, currentTimePeriod);
+            let previousPeriodItems = filterItemsByTimePeriod(allItems, getPreviousPeriod(currentTimePeriod));
+
+            // Calculate accurate stats
+            const totalUnclaimedItems = filteredItems.filter(item => item.status !== 'claimed').length;
+            const lostItems = filteredItems.filter(item => item.type === 'lost' && item.status !== 'claimed').length;
+            const foundItems = filteredItems.filter(item => item.type === 'found' && item.status !== 'claimed').length;
+            const claimedItems = filteredItems.filter(item => item.status === 'claimed').length;
+            
+            // Calculate claim rate based on all found items (claimed + unclaimed)
+            const totalFoundItems = allItems.filter(item => item.type === 'found').length;
+            const totalClaimedFromFound = allItems.filter(item => item.type === 'found' && item.status === 'claimed').length;
+            const claimRate = totalFoundItems > 0 ? Math.round((totalClaimedFromFound / totalFoundItems) * 100) : 0;
+
+            // Previous period stats for comparison
+            const prevTotalItems = previousPeriodItems.filter(item => item.status !== 'claimed').length;
+            const prevLostItems = previousPeriodItems.filter(item => item.type === 'lost' && item.status !== 'claimed').length;
+            const prevFoundItems = previousPeriodItems.filter(item => item.type === 'found' && item.status !== 'claimed').length;
+            const prevTotalFoundItems = previousPeriodItems.filter(item => item.type === 'found').length;
+            const prevClaimedFromFound = previousPeriodItems.filter(item => item.type === 'found' && item.status === 'claimed').length;
+            const prevClaimRate = prevTotalFoundItems > 0 ? Math.round((prevClaimedFromFound / prevTotalFoundItems) * 100) : 0;
+
+            // Update stat cards
+            document.getElementById('totalItems').textContent = totalUnclaimedItems;
+            document.getElementById('lostItems').textContent = lostItems;
+            document.getElementById('foundItems').textContent = foundItems;
+            document.getElementById('claimRate').textContent = claimRate + '%';
+
+            // Update change indicators
+            updateChangeIndicator('totalItemsChange', totalUnclaimedItems, prevTotalItems);
+            updateChangeIndicator('lostItemsChange', lostItems, prevLostItems);
+            updateChangeIndicator('foundItemsChange', foundItems, prevFoundItems);
+            updateChangeIndicator('claimRateChange', claimRate, prevClaimRate);
+
+            // Update charts with accurate data
+            updateTypeChart(filteredItems);
+            updateCategoryChart(filteredItems);
+            updateStatusChart(filteredItems);
+            updateTimelineChart(filteredItems);
+            updateRecentActivity(filteredItems);
+        }
+
+        // Update change indicator
+        function updateChangeIndicator(elementId, currentValue, previousValue) {
+            const element = document.getElementById(elementId);
+            const changeValue = previousValue !== 0 ? Math.round(((currentValue - previousValue) / previousValue) * 100) : 0;
+            
+            // Remove all classes
+            element.classList.remove('change-positive', 'change-negative', 'change-neutral');
+            
+            // Determine change type
+            if (changeValue > 0) {
+                element.classList.add('change-positive');
+                element.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="17 11 12 6 7 11"></polyline>
+                        <polyline points="17 18 12 13 7 18"></polyline>
+                    </svg>
+                    <span>${Math.abs(changeValue)}% from last period</span>
+                `;
+            } else if (changeValue < 0) {
+                element.classList.add('change-negative');
+                element.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="7 13 12 18 17 13"></polyline>
+                        <polyline points="7 6 12 11 17 6"></polyline>
+                    </svg>
+                    <span>${Math.abs(changeValue)}% from last period</span>
+                `;
+            } else {
+                element.classList.add('change-neutral');
+                element.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>No change from last period</span>
+                `;
+            }
+        }
+
+        // Update type chart
+        function updateTypeChart(items) {
+            const lostCount = items.filter(item => item.type === 'lost' && item.status !== 'claimed').length;
+            const foundCount = items.filter(item => item.type === 'found' && item.status !== 'claimed').length;
+            
+            typeChart.data.datasets[0].data = [lostCount, foundCount];
+            typeChart.update();
+        }
+
+        // Update category chart
+        function updateCategoryChart(items) {
+            // Only include unclaimed items in category chart
+            const unclaimedItems = items.filter(item => item.status !== 'claimed');
+            
+            // Group by category
+            const categoryCounts = {};
+            unclaimedItems.forEach(item => {
+                const category = item.category || 'Uncategorized';
+                categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+            });
+            
+            // Sort by count and take top 5
+            const sortedCategories = Object.entries(categoryCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+            
+            // Update chart
+            categoryChart.data.labels = sortedCategories.map(item => item[0]);
+            categoryChart.data.datasets[0].data = sortedCategories.map(item => item[1]);
+            categoryChart.update();
+        }
+
+        // Update status chart
+        function updateStatusChart(items) {
+            const unclaimedCount = items.filter(item => item.status !== 'claimed').length;
+            const claimedCount = items.filter(item => item.status === 'claimed').length;
+            
+            statusChart.data.datasets[0].data = [unclaimedCount, claimedCount];
+            statusChart.update();
+        }
+
+        // Update timeline chart
+        function updateTimelineChart(items) {
+            // Group by date based on current time period
+            const dateGroups = {};
+            const now = new Date();
+            let dateFormat, dateRange;
+            
+            switch (currentTimePeriod) {
+                case 'week':
+                    dateFormat = { weekday: 'short' };
+                    dateRange = 7;
+                    break;
+                case 'month':
+                    dateFormat = { day: 'numeric', month: 'short' };
+                    dateRange = 30;
+                    break;
+                case 'quarter':
+                    dateFormat = { month: 'short' };
+                    dateRange = 12;
+                    break;
+                case 'year':
+                    dateFormat = { month: 'short' };
+                    dateRange = 12;
+                    break;
+                default:
+                    dateFormat = { month: 'short', year: 'numeric' };
+                    dateRange = 12;
+            }
+            
+            // Initialize date groups
+            const labels = [];
+            const lostData = [];
+            const foundData = [];
+            
+            for (let i = dateRange - 1; i >= 0; i--) {
+                const date = new Date(now);
+                
+                if (currentTimePeriod === 'week') {
+                    date.setDate(date.getDate() - i);
+                    const label = date.toLocaleDateString(undefined, dateFormat);
+                    labels.push(label);
+                    dateGroups[label] = { lost: 0, found: 0 };
+                } else if (currentTimePeriod === 'month') {
+                    date.setDate(date.getDate() - i);
+                    const label = date.toLocaleDateString(undefined, dateFormat);
+                    labels.push(label);
+                    dateGroups[label] = { lost: 0, found: 0 };
+                } else if (currentTimePeriod === 'quarter' || currentTimePeriod === 'year') {
+                    date.setMonth(date.getMonth() - i);
+                    const label = date.toLocaleDateString(undefined, dateFormat);
+                    labels.push(label);
+                    dateGroups[label] = { lost: 0, found: 0 };
+                } else {
+                    date.setMonth(date.getMonth() - i);
+                    const label = date.toLocaleDateString(undefined, dateFormat);
+                    labels.push(label);
+                    dateGroups[label] = { lost: 0, found: 0 };
+                }
+            }
+            
+            // Count items per date (only unclaimed items)
+            items.forEach(item => {
+                if (item.status !== 'claimed') {
+                    const dateStr = new Date(item.timestamp || item.dateLost || item.dateFound || item.dateClaimed).toLocaleDateString(undefined, dateFormat);
+                    if (dateGroups[dateStr]) {
+                        if (item.type === 'lost') {
+                            dateGroups[dateStr].lost++;
+                        } else if (item.type === 'found') {
+                            dateGroups[dateStr].found++;
+                        }
+                    }
+                }
+            });
+            
+            // Prepare data for chart
+            labels.forEach(label => {
+                lostData.push(dateGroups[label]?.lost || 0);
+                foundData.push(dateGroups[label]?.found || 0);
+            });
+            
+            // Update chart
+            timelineChart.data.labels = labels;
+            timelineChart.data.datasets[0].data = lostData;
+            timelineChart.data.datasets[1].data = foundData;
+            timelineChart.update();
+        }
+
+        // Update recent activity table
+        function updateRecentActivity(items) {
+            // Sort by timestamp (newest first)
+            const sortedItems = [...items].sort((a, b) => {
+                const dateA = new Date(a.timestamp || a.dateLost || a.dateFound || a.dateClaimed);
+                const dateB = new Date(b.timestamp || b.dateLost || b.dateFound || b.dateClaimed);
+                return dateB - dateA;
+            }).slice(0, 10); // Take top 10
+            
+            // Update table
+            const tableBody = document.getElementById('recentActivityBody');
+            tableBody.innerHTML = '';
+            
+            sortedItems.forEach(item => {
+                const row = document.createElement('tr');
+                const date = new Date(item.timestamp || item.dateLost || item.dateFound || item.dateClaimed);
+                const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                row.innerHTML = `
+                    <td>${dateStr}</td>
+                    <td>${item.itemName || 'Unnamed Item'}</td>
+                    <td><span class="badge ${item.type === 'lost' ? 'badge-lost' : 'badge-found'}">${item.type === 'lost' ? 'Lost' : 'Found'}</span></td>
+                    <td><span class="badge ${item.status === 'claimed' ? 'badge-claimed' : (item.type === 'lost' ? 'badge-lost' : 'badge-found')}">${item.status === 'claimed' ? 'Claimed' : 'Unclaimed'}</span></td>
+                    <td>${item.location || 'Unknown'}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Filter items by time period
+        function filterItemsByTimePeriod(items, period) {
+            const now = new Date();
+            let startDate;
+            
+            switch (period) {
+                case 'week':
+                    startDate = new Date(now);
+                    startDate.setDate(startDate.getDate() - 7);
+                    break;
+                case 'month':
+                    startDate = new Date(now);
+                    startDate.setMonth(startDate.getMonth() - 1);
+                    break;
+                case 'quarter':
+                    startDate = new Date(now);
+                    startDate.setMonth(startDate.getMonth() - 3);
+                    break;
+                case 'year':
+                    startDate = new Date(now);
+                    startDate.setFullYear(startDate.getFullYear() - 1);
+                    break;
+                default:
+                    return items; // All time
+            }
+            
+            return items.filter(item => {
+                const itemDate = new Date(item.timestamp || item.dateLost || item.dateFound || item.dateClaimed);
+                return itemDate >= startDate;
+            });
+        }
+
+        // Get previous period for comparison
+        function getPreviousPeriod(period) {
+            switch (period) {
+                case 'week':
+                    return 'week-prev';
+                case 'month':
+                    return 'month-prev';
+                case 'quarter':
+                    return 'quarter-prev';
+                case 'year':
+                    return 'year-prev';
+                default:
+                    return 'all';
+            }
+        }
+
+        // Change time period
+        function changeTimePeriod(period) {
+            currentTimePeriod = period;
+            
+            // Update active button
+            document.querySelectorAll('.time-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.toLowerCase().includes(period)) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Update analytics
+            updateAnalytics();
+        }
+
+        // Initialize the dashboard when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+            loadData();
+        });
+
+        // Make functions available globally
+        window.showContactModal = showContactModal;
+        window.closeModal = closeModal;
+        window.changeTimePeriod = changeTimePeriod;
+    </script>
+
+    <script>
+        // Logout function
+        function logout() {
+            window.location.href = 'index.html';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('contactModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('contactModal')) {
+                closeModal();
+            }
+        });
+
+        // Show contact modal (dummy function - implement as needed)
+        function showContactModal(item) {
+            console.log("Show contact modal for item:", item);
+            // Implement your modal display logic here
+        }
+
+        // Close modal (dummy function - implement as needed)
+        function closeModal() {
+            console.log("Close modal");
+            // Implement your modal close logic here
+        }
+    </script>
+</body>
+</html>

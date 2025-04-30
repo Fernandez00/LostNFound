@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lost & Found Items</title>
+    <link rel="icon" type="image/png" href="/LNF.jpg">
+    <style>
+        :root {
+            --primary: #4834d4;
+            --primary-dark: #3525b0;
+            --surface: #ffffff;
+            --text: #2d3436;
+            --text-light: #636e72;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.5;
+            background-color: #f8f9fa;
+            color: var(--text);
+        }
+
+        header {
+            background-color: var(--primary);
+            padding: 1.5rem 2rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .logout-btn {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            color: var(--primary);
+            background-color: white;
+            border: 1px solid var(--primary);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .logout-btn:hover {
+            background-color: var(--primary-dark);
+            color: white;
+        }
+
+        .search-container {
+            max-width: 1200px;
+            margin: 1rem auto 0;
+            padding: 0 1rem;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .search-suggestions {
+            position: absolute;
+            width: calc(100% - 2rem);
+            max-width: 1200px;
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 0 0 8px 8px;
+            box-shadow: var(--shadow);
+            z-index: 100;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .suggestion-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+        }
+
+        .suggestion-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto 2rem;
+            padding: 0 1rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            height: fit-content;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title span {
+            font-size: 0.875rem;
+            font-weight: normal;
+            color: var(--text-light);
+        }
+
+        .newsfeed {
+            max-height: 70vh;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .newsfeed-item {
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 1.5rem;
+        }
+
+        .newsfeed-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .newsfeed-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .newsfeed-type {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .type-lost {
+            background-color: #ffeaa7;
+            color: #d35400;
+        }
+
+        .type-found {
+            background-color: #55efc4;
+            color: #006266;
+        }
+
+        .newsfeed-image-container {
+            width: 100%;
+            height: 180px;
+            background-color: #f5f6fa;
+            border-radius: 8px;
+            margin: 0.75rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .newsfeed-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .no-image {
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+        .newsfeed-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin: 0.5rem 0;
+            color: var(--text);
+        }
+
+        .newsfeed-details {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .newsfeed-location {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .newsfeed-status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+
+        .status-unclaimed {
+            background-color: #ffeaa7;
+            color: #d35400;
+        }
+
+        .status-claimed {
+            background-color: #55efc4;
+            color: #006266;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .modal-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .contact-info {
+            margin-top: 1.5rem;
+        }
+
+        .contact-item {
+            display: flex;
+            margin-bottom: 0.75rem;
+        }
+
+        .contact-label {
+            font-weight: 500;
+            min-width: 80px;
+            color: var(--text);
+        }
+
+        .contact-value {
+            color: var(--text-light);
+        }
+
+        @media (max-width: 768px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+
+            .header-title {
+                font-size: 1.5rem;
+            }
+
+            .card {
+                padding: 1.25rem;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="header-title">LOST & FOUND ITEMS</h1>
+        <button class="logout-btn" onclick="logout()">Back to Dashboard</button>
+    </header>
+
+    <div class="search-container">
+        <input type="text" class="search-bar" id="searchInput" placeholder="Search items by name..." autocomplete="off">
+        <div class="search-suggestions" id="searchSuggestions"></div>
+    </div>
+
+    <main>
+        <section class="card">
+            <h2 class="card-title">Lost Items <span id="lostCount">0 items</span></h2>
+            <div class="newsfeed" id="lostItemsFeed">
+                <div class="empty-state">Loading lost items...</div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="card-title">Found Items <span id="foundCount">0 items</span></h2>
+            <div class="newsfeed" id="foundItemsFeed">
+                <div class="empty-state">Loading found items...</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Contact Info Modal -->
+    <div class="modal" id="contactModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <h3 class="modal-title" id="modalItemTitle">Item Details</h3>
+            <img id="modalItemImage" class="modal-image" src="" alt="Item Image">
+            <div id="modalItemDetails"></div>
+            <div class="contact-info">
+                <h4>Contact Information</h4>
+                <div class="contact-item">
+                    <span class="contact-label">Name:</span>
+                    <span class="contact-value" id="contactName"></span>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-label">Phone:</span>
+                    <span class="contact-value" id="contactPhone"></span>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-label">Email:</span>
+                    <span class="contact-value" id="contactEmail"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCOZZ44tcqI8TPCXK6SzT7tURKM01j7efo",
+            authDomain: "lostnfounditemlostdb.firebaseapp.com",
+            databaseURL: "https://lostnfounditemlostdb-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "lostnfounditemlostdb",
+            storageBucket: "lostnfounditemlostdb.appspot.com",
+            messagingSenderId: "494153480103",
+            appId: "1:494153480103:web:e04aef1eab4e89cdb5a882"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Global variables
+        let allItems = [];
+        let searchSuggestions = [];
+
+        // Function to format date
+        function formatDate(dateString) {
+            if (!dateString) return 'Unknown date';
+            try {
+                const options = { year: 'numeric', month: 'short', day: 'numeric' };
+                return new Date(dateString).toLocaleDateString(undefined, options);
+            } catch (e) {
+                return 'Unknown date';
+            }
+        }
+
+        // Function to show contact modal
+        function showContactModal(item) {
+            const modal = document.getElementById('contactModal');
+            const modalTitle = document.getElementById('modalItemTitle');
+            const modalImage = document.getElementById('modalItemImage');
+            const modalDetails = document.getElementById('modalItemDetails');
+            const contactName = document.getElementById('contactName');
+            const contactPhone = document.getElementById('contactPhone');
+            const contactEmail = document.getElementById('contactEmail');
+
+            // Set modal content
+            modalTitle.textContent = item.itemName || 'Item Details';
+            
+            if (item.imageUrl) {
+                modalImage.src = item.imageUrl;
+                modalImage.style.display = 'block';
+            } else {
+                modalImage.style.display = 'none';
+            }
+
+            // Set item details
+            const date = item.dateLost || item.dateFound;
+            const formattedDate = formatDate(date);
+            
+            let detailsHtml = `
+                <div><strong>Type:</strong> ${item.type === 'lost' ? 'Lost' : 'Found'}</div>
+                <div><strong>Date:</strong> ${formattedDate}</div>
+                <div><strong>Category:</strong> ${item.category || 'Not specified'}</div>
+                <div><strong>Color:</strong> ${item.primaryColor1 || 'Not specified'}</div>
+                <div><strong>Location:</strong> ${item.location || 'Unknown'} ${item.additionalLocation ? `(${item.additionalLocation})` : ''}</div>
+                <div><strong>Status:</strong> ${item.status === 'claimed' ? 'Claimed' : 'Unclaimed'}</div>
+            `;
+            
+            modalDetails.innerHTML = detailsHtml;
+
+            // Set contact info
+            contactName.textContent = item.fullName || 'Not provided';
+            contactPhone.textContent = item.phoneNumber || 'Not provided';
+            contactEmail.textContent = item.email || 'Not provided';
+
+            // Show modal
+            modal.style.display = 'flex';
+        }
+
+        // Function to close modal
+        function closeModal() {
+            document.getElementById('contactModal').style.display = 'none';
+        }
+
+        // Function to render items
+        function renderItems(items, containerId, type) {
+            const container = document.getElementById(containerId);
+            
+            if (items.length === 0) {
+                container.innerHTML = '<div class="empty-state">No ' + type + ' items found</div>';
+                return;
+            }
+
+            let html = '';
+            items.forEach(item => {
+                const date = item.dateLost || item.dateFound;
+                const formattedDate = formatDate(date);
+                
+                html += `
+                    <div class="newsfeed-item">
+                        <div class="newsfeed-header">
+                            <span class="newsfeed-type ${type === 'lost' ? 'type-lost' : 'type-found'}">
+                                ${type === 'lost' ? 'Lost' : 'Found'}
+                            </span>
+                            <span>${formattedDate}</span>
+                        </div>
+                        <h3 class="newsfeed-title">${item.itemName || 'Unnamed Item'}</h3>
+                        <div class="newsfeed-details">
+                            <span>${item.category || 'No category'}</span>
+                            <span>•</span>
+                            <span>${item.primaryColor1 || 'No color specified'}</span>
+                        </div>
+                        <div class="newsfeed-image-container" onclick="showContactModal(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+                            ${item.imageUrl ? `
+                                <img src="${item.imageUrl}" alt="${item.itemName}" class="newsfeed-image">
+                            ` : `
+                                <div class="no-image">No image available</div>
+                            `}
+                        </div>
+                        <div class="newsfeed-location">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                            <span>${item.location || 'Unknown location'} ${item.additionalLocation ? `(${item.additionalLocation})` : ''}</span>
+                        </div>
+                        <div class="newsfeed-status status-${item.status === 'claimed' ? 'claimed' : 'unclaimed'}">
+                            ${item.status === 'claimed' ? 'Claimed' : 'Unclaimed'}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            document.getElementById(`${type}Count`).textContent = `${items.length} items`;
+        }
+
+        // Function to load all items
+        function loadAllItems() {
+            const lostItemsRef = ref(db, 'lostItems');
+            const foundItemsRef = ref(db, 'foundItems');
+
+            onValue(lostItemsRef, (lostSnapshot) => {
+                onValue(foundItemsRef, (foundSnapshot) => {
+                    allItems = [];
+                    const lostItems = [];
+                    const foundItems = [];
+                    
+                    // Process lost items
+                    if (lostSnapshot.exists()) {
+                        lostSnapshot.forEach((childSnapshot) => {
+                            const item = childSnapshot.val();
+                            item.id = childSnapshot.key;
+                            item.type = 'lost';
+                            lostItems.push(item);
+                            allItems.push(item);
+                        });
+                    }
+                    
+                    // Process found items
+                    if (foundSnapshot.exists()) {
+                        foundSnapshot.forEach((childSnapshot) => {
+                            const item = childSnapshot.val();
+                            item.id = childSnapshot.key;
+                            item.type = 'found';
+                            foundItems.push(item);
+                            allItems.push(item);
+                        });
+                    }
+                    
+                    // Sort by timestamp (newest first)
+                    lostItems.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    foundItems.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                    // Render items
+                    renderItems(lostItems, 'lostItemsFeed', 'lost');
+                    renderItems(foundItems, 'foundItemsFeed', 'found');
+
+                    // Build search suggestions
+                    buildSearchSuggestions();
+                });
+            });
+        }
+
+        // Function to build search suggestions
+        function buildSearchSuggestions() {
+            searchSuggestions = [];
+            const itemNames = new Set();
+            
+            allItems.forEach(item => {
+                if (item.itemName) {
+                    itemNames.add(item.itemName.toLowerCase());
+                }
+            });
+            
+            searchSuggestions = Array.from(itemNames);
+        }
+
+        // Function to show search suggestions
+        function showSuggestions(searchTerm) {
+            const suggestionsContainer = document.getElementById('searchSuggestions');
+            
+            if (!searchTerm || searchTerm.length < 2) {
+                suggestionsContainer.style.display = 'none';
+                return;
+            }
+            
+            const filtered = searchSuggestions.filter(suggestion => 
+                suggestion.includes(searchTerm.toLowerCase())
+            ).slice(0, 5);
+            
+            if (filtered.length === 0) {
+                suggestionsContainer.style.display = 'none';
+                return;
+            }
+            
+            let html = '';
+            filtered.forEach(suggestion => {
+                html += `<div class="suggestion-item">${suggestion}</div>`;
+            });
+            
+            suggestionsContainer.innerHTML = html;
+            suggestionsContainer.style.display = 'block';
+        }
+
+        // Function to filter items by search term
+        function filterItems(searchTerm) {
+            if (!searchTerm || searchTerm.length < 2) {
+                // Reset to show all items if search is empty
+                loadAllItems();
+                return;
+            }
+            
+            const filteredLost = allItems.filter(item => 
+                item.type === 'lost' && 
+                item.itemName && 
+                item.itemName.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            
+            const filteredFound = allItems.filter(item => 
+                item.type === 'found' && 
+                item.itemName && 
+                item.itemName.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            
+            renderItems(filteredLost, 'lostItemsFeed', 'lost');
+            renderItems(filteredFound, 'foundItemsFeed', 'found');
+        }
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.trim();
+            showSuggestions(searchTerm);
+            filterItems(searchTerm);
+        });
+
+        document.getElementById('searchSuggestions').addEventListener('click', (e) => {
+            if (e.target.classList.contains('suggestion-item')) {
+                const searchTerm = e.target.textContent;
+                document.getElementById('searchInput').value = searchTerm;
+                document.getElementById('searchSuggestions').style.display = 'none';
+                filterItems(searchTerm);
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-container')) {
+                document.getElementById('searchSuggestions').style.display = 'none';
+            }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('contactModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('contactModal')) {
+                closeModal();
+            }
+        });
+
+        // Load all items when page loads
+        document.addEventListener('DOMContentLoaded', loadAllItems);
+
+        // Make functions available globally
+        window.showContactModal = showContactModal;
+        window.closeModal = closeModal;
+        window.logout = function() {
+            window.location.href = 'student.html';
+        }
+    </script>
+</body>
+</html>

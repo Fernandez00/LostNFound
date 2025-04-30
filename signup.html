@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Sign Up</title>
+    <link rel="icon" type="image/png" href="/LNF.jpg">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+        
+        .form-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 320px;
+            text-align: center;
+        }
+        
+        h1 {
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        
+        .show-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #5138ee;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .btn-login {
+            background-color: #5138ee;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 12px;
+            width: 100%;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Student Sign Up</h1>
+
+        <div class="input-group">
+            <input type="text" id="fullName" placeholder="LastName, FirstName, Middle Initial">
+        </div>
+
+        <div class="input-group">
+            <input type="text" id="signupIdNumber" placeholder="ID Number">
+        </div>
+
+        <div class="input-group">
+            <input type="password" id="signupPassword" placeholder="Password">
+            <button class="show-btn" onclick="togglePassword('signupPassword', this)">Show</button>
+        </div>
+        
+        <div class="input-group">
+            <input type="password" id="confirmPassword" placeholder="Reenter Password">
+            <button class="show-btn" onclick="togglePassword('confirmPassword', this)">Show</button>
+        </div>
+        
+        <button class="btn-login" onclick="signUp()">Sign Up</button>
+
+        <a class="sign-link" href="index.html">Back to Login</a>
+    </div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword } 
+            from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+        import { getDatabase, ref, set } 
+            from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+
+        // ✅ Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBqf6biwARQaJS2D-Wdw5313hITDMKCvjo",
+            authDomain: "lostandfound-352d6.firebaseapp.com",
+            databaseURL: "https://lostandfound-352d6-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "lostandfound-352d6",
+            storageBucket: "lostandfound-352d6.appspot.com",
+            messagingSenderId: "188690377553",
+            appId: "1:188690377553:web:b8c81d5625cc974e394170"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        // ✅ Sign Up Function (Stores Full Name & ID Number)
+        window.signUp = function() {
+            const fullName = document.getElementById("fullName").value;
+            const idNumber = document.getElementById("signupIdNumber").value;
+            const password = document.getElementById("signupPassword").value;
+            const confirmPassword = document.getElementById("confirmPassword").value;
+
+            if (!fullName) {
+                alert("❌ Please enter your full name.");
+                return;
+            }
+            if (!idNumber) {
+                alert("❌ Please enter your ID Number.");
+                return;
+            }
+            if (password !== confirmPassword) {
+                alert("❌ Passwords do not match!");
+                return;
+            }
+
+            // ✅ Firebase requires an email, so we create a unique one
+            const email = `${idNumber}@example.com`;
+
+            createUserWithEmailAndPassword(auth, email, password)
+                .then(userCredential => {
+                    const user = userCredential.user;
+                    const userId = user.uid;  // Get unique Firebase UID
+
+                    // ✅ Save Student Data in Realtime Database
+                    return set(ref(database, 'users/' + userId), { 
+                        idNumber, 
+                        fullName, 
+                        email,
+                        role: "student" 
+                    });
+                })
+                .then(() => {
+                    alert(`✅ Account created successfully!`);
+                    window.location.href = "index.html"; // Redirect to login after signup
+                })
+                .catch(error => {
+                    alert("❌ Error: " + error.message);
+                });
+        };
+
+       // ✅ Password Show/Hide Function
+       window.togglePassword = function(inputId, button) {
+            const input = document.getElementById(inputId);
+            if (input.type === "password") {
+                input.type = "text";
+                button.textContent = "Hide";
+            } else {
+                input.type = "password";
+                button.textContent = "Show";
+            }
+        };
+    </script>
+</body>
+</html>
