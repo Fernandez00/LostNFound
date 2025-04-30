@@ -325,9 +325,31 @@
                     throw new Error("Please fill in all required fields");
                 }
 
-                // Push data to Firebase
+                // Get current user data from sessionStorage
+                const userData = JSON.parse(sessionStorage.getItem('user'));
+                if (!userData) {
+                    throw new Error("User not logged in");
+                }
+
+                // Add user ID to form data
+                formData.userId = userData.idNumber;
+                formData.userName = userData.name;
+                formData.userEmail = userData.email;
+
+                // Push data to Firebase under lostItems
                 const newItemRef = push(ref(db, "lostItems"));
                 await set(newItemRef, formData);
+
+                // Also save under the user's reports
+                const userReportRef = push(ref(db, `users/${userData.idNumber}/reports`));
+                await set(userReportRef, {
+                    reportId: newItemRef.key,
+                    type: "lost",
+                    itemName: formData.itemName,
+                    dateReported: formData.timestamp,
+                    status: "unclaimed",
+                    imageUrl: formData.imageUrl || null
+                });
 
                 console.log("Data saved successfully with ID:", newItemRef.key);
                 return newItemRef.key;
@@ -346,6 +368,17 @@
             const uploadBtn = document.getElementById('uploadBtn');
             const form = document.getElementById('lostItemForm');
             const loadingIndicator = document.getElementById('loadingIndicator');
+
+            // Check if user is logged in and auto-fill their info
+            const userData = JSON.parse(sessionStorage.getItem('user'));
+            if (userData) {
+                document.getElementById('fullName').value = userData.name || '';
+                document.getElementById('email').value = userData.email || '';
+            } else {
+                // Redirect to login if not logged in
+                window.location.href = 'index.html';
+                return;
+            }
 
             // Image upload preview
             fileInput.addEventListener('change', function() {
