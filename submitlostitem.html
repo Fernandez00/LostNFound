@@ -347,7 +347,6 @@
                     type: "lost",
                     itemName: formData.itemName,
                     dateReported: formData.timestamp,
-                    status: "unclaimed",
                     imageUrl: formData.imageUrl || null
                 });
 
@@ -439,7 +438,6 @@
                         email: document.getElementById('email').value,
                         imageUrl: imageUrl,
                         timestamp: new Date().toISOString(),
-                        status: "unclaimed"
                     };
 
                     // Call the Firebase submission function

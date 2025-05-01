@@ -45,7 +45,6 @@ document.addEventListener("DOMContentLoaded", () => {
         email: document.getElementById("email")?.value || "",
         imageURL: document.getElementById("imageURL")?.value || null,
         timestamp: new Date().toISOString(),
-        status: "unclaimed",
         userId: userData.idNumber,
         userName: userData.name,
         userEmail: userData.email,
@@ -76,7 +75,6 @@ document.addEventListener("DOMContentLoaded", () => {
         type: "found",
         itemName: formData.itemName,
         dateReported: formData.timestamp,
-        status: "unclaimed",
         imageURL: formData.imageURL || null,
       })
 

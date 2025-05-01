@@ -453,7 +453,7 @@
             statusChart = new Chart(statusCtx, {
                 type: 'pie',
                 data: {
-                    labels: ['Unclaimed', 'Claimed'],
+                    labels: ['Claimed'],
                     datasets: [{
                         data: [0, 0],
                         backgroundColor: [
@@ -544,33 +544,7 @@
                                 }
                             });
                         }
-                        
-                        // Process lost items (only unclaimed)
-                        if (lostSnapshot.exists()) {
-                            lostSnapshot.forEach((childSnapshot) => {
-                                const item = childSnapshot.val();
-                                if (!claimedIds.has(childSnapshot.key)) {
-                                    item.id = childSnapshot.key;
-                                    item.type = 'lost';
-                                    item.status = 'unclaimed';
-                                    allItems.push(item);
-                                }
-                            });
-                        }
-                        
-                        // Process found items (only unclaimed)
-                        if (foundSnapshot.exists()) {
-                            foundSnapshot.forEach((childSnapshot) => {
-                                const item = childSnapshot.val();
-                                if (!claimedIds.has(childSnapshot.key)) {
-                                    item.id = childSnapshot.key;
-                                    item.type = 'found';
-                                    item.status = 'unclaimed';
-                                    allItems.push(item);
-                                }
-                            });
-                        }
-                        
+
                         // Process claimed items
                         if (claimedSnapshot.exists()) {
                             claimedSnapshot.forEach((childSnapshot) => {

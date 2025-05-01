@@ -231,10 +231,6 @@
             margin-top: 0.5rem;
         }
 
-        .status-unclaimed {
-            background-color: #ffeaa7;
-            color: #d35400;
-        }
 
         .status-claimed {
             background-color: #55efc4;
@@ -448,7 +444,6 @@
                 <div><strong>Category:</strong> ${item.category || 'Not specified'}</div>
                 <div><strong>Color:</strong> ${item.primaryColor1 || 'Not specified'}</div>
                 <div><strong>Location:</strong> ${item.location || 'Unknown'} ${item.additionalLocation ? `(${item.additionalLocation})` : ''}</div>
-                <div><strong>Status:</strong> ${item.status === 'claimed' ? 'Claimed' : 'Unclaimed'}</div>
             `;
             
             modalDetails.innerHTML = detailsHtml;
@@ -508,9 +503,6 @@
                                 <circle cx="12" cy="10" r="3"></circle>
                             </svg>
                             <span>${item.location || 'Unknown location'} ${item.additionalLocation ? `(${item.additionalLocation})` : ''}</span>
-                        </div>
-                        <div class="newsfeed-status status-${item.status === 'claimed' ? 'claimed' : 'unclaimed'}">
-                            ${item.status === 'claimed' ? 'Claimed' : 'Unclaimed'}
                         </div>
                     </div>
                 `;
