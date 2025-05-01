@@ -110,7 +110,7 @@
             margin-bottom: 10px;
             border-radius: 4px;
             background-color: #f9f9f9;
-            height: 100px;
+            min-height: 100px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -118,11 +118,41 @@
             position: relative;
         }
 
-        #uploadedImage {
-            max-width: 100%;
-            max-height: 100%;
+        .image-preview-container {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            margin-bottom: 10px;
+            padding: 5px;
+        }
+
+        .image-preview {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .image-preview img {
+            max-width: 80px;
+            max-height: 80px;
             object-fit: contain;
-            display: none;
+            border-radius: 4px;
+        }
+
+        .remove-image-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
         }
 
         .image-placeholder {
@@ -236,13 +266,13 @@
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label">Upload Image</label>
+                            <label class="form-label">Upload Images</label>
                             <div class="image-upload-container" id="imageContainer">
-                                <img id="uploadedImage" alt="Uploaded image preview">
-                                <div class="image-placeholder" id="imagePlaceholder">No image selected</div>
+                                <div class="image-preview-container" id="imagePreviewContainer"></div>
+                                <div class="image-placeholder" id="imagePlaceholder">Images will appear here (multiple allowed)</div>
                             </div>
-                            <input type="file" id="itemImage" accept="image/*" style="display: none;">
-                            <button type="button" class="btn btn-upload" id="uploadBtn">Upload Image</button>
+                            <input type="file" id="itemImages" accept="image/*" style="display: none;" multiple>
+                            <button type="button" class="btn btn-upload" id="uploadBtn">Upload Images</button>
                         </div>
                     </div>
                     
@@ -359,7 +389,7 @@
                     type: "found",
                     itemName: formData.itemName,
                     dateReported: formData.timestamp,
-                    imageUrl: formData.imageUrl || null
+                    imageUrls: formData.imageUrls || []
                 });
 
                 console.log("Data saved successfully with ID:", newItemRef.key);
@@ -373,12 +403,15 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const fileInput = document.getElementById('itemImage');
-            const uploadedImage = document.getElementById('uploadedImage');
+            const fileInput = document.getElementById('itemImages');
+            const imagePreviewContainer = document.getElementById('imagePreviewContainer');
             const imagePlaceholder = document.getElementById('imagePlaceholder');
             const uploadBtn = document.getElementById('uploadBtn');
             const form = document.getElementById('foundItemForm');
             const loadingIndicator = document.getElementById('loadingIndicator');
+
+            // Array to store image files for preview and upload
+            let imageFiles = [];
 
             // Check if user is logged in and auto-fill their info
             const userData = JSON.parse(sessionStorage.getItem('user'));
@@ -391,17 +424,46 @@
                 return;
             }
 
-            // Image upload preview
+            // Function to update image previews
+            function updateImagePreviews() {
+                imagePreviewContainer.innerHTML = '';
+                if (imageFiles.length > 0) {
+                    imagePlaceholder.style.display = 'none';
+                    imageFiles.forEach((file, index) => {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const previewDiv = document.createElement('div');
+                            previewDiv.className = 'image-preview';
+
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.alt = 'Image preview';
+
+                            const removeBtn = document.createElement('button');
+                            removeBtn.className = 'remove-image-btn';
+                            removeBtn.innerHTML = '×';
+                            removeBtn.onclick = () => {
+                                imageFiles.splice(index, 1);
+                                updateImagePreviews();
+                            };
+
+                            previewDiv.appendChild(img);
+                            previewDiv.appendChild(removeBtn);
+                            imagePreviewContainer.appendChild(previewDiv);
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                } else {
+                    imagePlaceholder.style.display = 'block';
+                }
+            }
+
+            // Image upload handling
             fileInput.addEventListener('change', function() {
-                const file = fileInput.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        uploadedImage.src = e.target.result;
-                        uploadedImage.style.display = 'block';
-                        imagePlaceholder.style.display = 'none';
-                    };
-                    reader.readAsDataURL(file);
+                const files = Array.from(fileInput.files);
+                if (files.length > 0) {
+                    imageFiles = [...imageFiles, ...files];
+                    updateImagePreviews();
                 }
             });
 
@@ -416,11 +478,9 @@
                 loadingIndicator.style.display = 'flex';
 
                 try {
-                    // Handle image upload first
-                    const imageFile = fileInput.files[0];
-                    let imageUrl = null;
-
-                    if (imageFile) {
+                    // Handle multiple image uploads
+                    const imageUrls = [];
+                    for (const imageFile of imageFiles) {
                         const formData = new FormData();
                         formData.append('image', imageFile);
 
@@ -431,9 +491,9 @@
 
                         const result = await response.json();
                         if (result.success) {
-                            imageUrl = result.data.url;
+                            imageUrls.push(result.data.url);
                         } else {
-                            throw new Error('Image upload failed');
+                            throw new Error(`Image upload failed for ${imageFile.name}`);
                         }
                     }
 
@@ -448,7 +508,7 @@
                         fullName: document.getElementById('fullName').value,
                         phoneNumber: document.getElementById('phoneNumber').value,
                         email: document.getElementById('email').value,
-                        imageUrl: imageUrl,
+                        imageUrls: imageUrls, // Array of image URLs
                         timestamp: new Date().toISOString(),
                     };
 

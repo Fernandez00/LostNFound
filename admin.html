@@ -52,18 +52,7 @@
             gap: 1rem;
         }
 
-        .logout-btn {
-            padding: 0.5rem 1rem;
-            font-size: 1rem;
-            color: #4834d4;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: 0.2s;
-            border: none;
-            background-color: var(--surface);
-            border: 1px solid var(--surface);
-        }
-
+        .logout-btn,
         .analytics-btn {
             padding: 0.5rem 1rem;
             font-size: 1rem;
@@ -76,11 +65,7 @@
             border: 1px solid var(--surface);
         }
 
-        .logout-btn:hover {
-            background-color: var(--primary-dark);
-            color: white;
-        }
-
+        .logout-btn:hover,
         .analytics-btn:hover {
             background-color: var(--primary-dark);
             color: white;
@@ -168,6 +153,7 @@
             border-bottom: 1px solid #eee;
             padding-bottom: 1.5rem;
             position: relative;
+            cursor: pointer;
         }
 
         .newsfeed-item:last-child {
@@ -213,18 +199,74 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            cursor: pointer;
+            position: relative;
         }
 
         .newsfeed-image {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
+            cursor: pointer;
         }
 
         .no-image {
             color: var(--text-light);
             font-style: italic;
+        }
+
+        .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .newsfeed-image-container:hover .nav-button {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .nav-button:hover {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        .nav-button.prev {
+            left: 10px;
+        }
+
+        .nav-button.next {
+            right: 10px;
+        }
+
+        .image-counter {
+            position: absolute;
+            bottom: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .newsfeed-image-container:hover .image-counter {
+            opacity: 1;
+            visibility: visible;
         }
 
         .newsfeed-title {
@@ -332,7 +374,7 @@
             padding: 2rem;
             box-shadow: var(--shadow);
             position: relative;
-            overflow-y: auto; /* Add scrolling */
+            overflow-y: auto;
         }
 
         .modal-close {
@@ -344,7 +386,6 @@
             color: var(--text-light);
             background: none;
             border: none;
-            padding: 0.5rem;
         }
 
         .modal-title {
@@ -353,17 +394,103 @@
             color: var(--text);
         }
 
-        .modal-image {
+        .modal-images-container {
+            position: relative;
             width: 100%;
-            max-height: 300px;
+            max-height: 200px;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f5f6fa;
+            border-radius: 8px;
+            padding: 5px;
+            overflow: hidden;
+        }
+
+        .modal-image {
+            max-width: 100%;
+            max-height: 190px;
             object-fit: contain;
             border-radius: 8px;
-            margin-bottom: 1rem;
+        }
+
+        .modal-nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 10px;
             cursor: pointer;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: background-color 0.3s;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .modal-images-container:hover .modal-nav-button {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-nav-button:hover {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        .modal-nav-button.prev {
+            left: 10px;
+        }
+
+        .modal-nav-button.next {
+            right: 10px;
+        }
+
+        .modal-image-counter {
+            position: absolute;
+            bottom: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .modal-images-container:hover .modal-image-counter {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-details {
+            margin-bottom: 1rem;
+        }
+
+        .modal-details div {
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-details strong {
+            display: inline-block;
+            width: 80px;
+            font-weight: 500;
         }
 
         .contact-info {
             margin-top: 1.5rem;
+        }
+
+        .contact-info h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
         }
 
         .contact-item {
@@ -402,9 +529,9 @@
 
         .form-actions {
             display: flex;
-            justify-content: flex-end;
-            gap: 1rem;
-            margin-top: 1.5rem;
+            justify-content: space-between;
+            gap: 0.5rem;
+            margin-top: 1rem;
         }
 
         .btn {
@@ -413,6 +540,7 @@
             font-weight: 500;
             cursor: pointer;
             border: none;
+            flex: 1;
         }
 
         .btn-primary {
@@ -425,34 +553,154 @@
             color: var(--text);
         }
 
+        /* Edit Modal Styles */
+        .edit-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .edit-modal-content {
+            background-color: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            overflow-y: auto;
+        }
+
+        .edit-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .edit-modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .edit-modal-close {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+            background: none;
+            border: none;
+        }
+
+        .edit-form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .edit-form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .edit-form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .edit-form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .edit-form-btn {
+            padding: 0.75rem 1.25rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .edit-form-cancel {
+            background-color: #eee;
+            border: none;
+            color: #333;
+        }
+
+        .edit-form-submit {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+        }
+
+        .edit-form-submit:hover {
+            background-color: var(--primary-dark);
+        }
+
         /* Image upload styles */
         .image-upload-container {
-            border: 2px dashed #ddd;
-            border-radius: 8px;
-            padding: 1.5rem;
-            text-align: center;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+            padding: 1rem;
             margin-bottom: 1rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            height: 150px;
+            min-height: 120px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            position: relative;
         }
 
         .image-upload-container:hover {
             border-color: var(--primary);
-            background-color: #f8f9fa;
+        }
+
+        .image-preview-container {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            margin-bottom: 10px;
+            width: 100%;
+            padding: 5px;
+        }
+
+        .image-preview-wrapper {
+            position: relative;
+            flex-shrink: 0;
         }
 
         .image-preview {
-            max-width: 100%;
-            max-height: 120px;
-            margin-top: 0.5rem;
+            max-width: 100px;
+            max-height: 100px;
             border-radius: 4px;
             object-fit: contain;
+        }
+
+        .remove-image-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
         }
 
         .upload-progress {
@@ -470,6 +718,22 @@
             background-color: var(--primary);
             width: 0%;
             transition: width 0.3s;
+        }
+
+        .upload-image-btn {
+            padding: 0.5rem 1rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            transition: background-color 0.2s;
+        }
+
+        .upload-image-btn:hover {
+            background-color: var(--primary-dark);
         }
 
         .loading-overlay {
@@ -512,13 +776,23 @@
                 padding: 1.25rem;
             }
 
-            .modal-content {
+            .modal-content,
+            .edit-modal-content {
                 width: 95%;
-                padding: 1.5rem;
+                padding: 1rem;
+            }
+
+            .modal-image {
+                max-height: 160px;
+            }
+
+            .modal-nav-button {
+                width: 30px;
+                height: 30px;
+                font-size: 14px;
             }
         }
 
-        /* Add some padding at the bottom to ensure content isn't cut off */
         #editItemForm {
             padding-bottom: 1rem;
         }
@@ -557,10 +831,10 @@
     <!-- Item Details Modal -->
     <div class="modal" id="itemModal">
         <div class="modal-content">
-            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <button class="modal-close" onclick="closeModal()">×</button>
             <h3 class="modal-title" id="modalItemTitle">Item Details</h3>
-            <img id="modalItemImage" class="modal-image" src="/placeholder.svg" alt="Item Image" onclick="showEditModal(currentItem)">
-            <div id="modalItemDetails"></div>
+            <div class="modal-images-container" id="modalImagesContainer"></div>
+            <div class="modal-details" id="modalItemDetails"></div>
             <div class="contact-info">
                 <h4>Contact Information</h4>
                 <div class="contact-item">
@@ -577,7 +851,7 @@
                 </div>
             </div>
             <div class="form-actions">
-                <button class="btn btn-primary" id="editItemBtn" onclick="showEditModal(currentItem)">Edit</button>
+                <button class="btn btn-primary" id="editItemBtn" onclick="openEditModal(currentItem)">Edit</button>
                 <button class="btn btn-primary" id="claimItemBtn" style="background-color: var(--success);">Mark as Claimed</button>
                 <button class="btn btn-primary" id="deleteItemBtn" style="background-color: var(--danger);">Delete</button>
             </div>
@@ -585,58 +859,61 @@
     </div>
 
     <!-- Edit Item Modal -->
-    <div class="modal" id="editModal">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeEditModal()">&times;</button>
-            <h3 class="modal-title">Edit Item</h3>
+    <div class="edit-modal" id="editModal">
+        <div class="edit-modal-content">
+            <div class="edit-modal-header">
+                <h3 class="edit-modal-title">Edit Item</h3>
+                <button class="edit-modal-close" onclick="closeEditModal()">×</button>
+            </div>
             <form id="editItemForm">
-                <div class="form-group">
-                    <label class="form-label">Item Name</label>
-                    <input type="text" class="form-control" id="editItemName" required>
+                <div class="edit-form-group">
+                    <label class="edit-form-label">Item Name</label>
+                    <input type="text" class="edit-form-input" id="editItemName" required>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Category</label>
-                    <input type="text" class="form-control" id="editCategory" required>
+                <div class="edit-form-group">
+                    <label class="edit-form-label">Category</label>
+                    <input type="text" class="edit-form-input" id="editCategory" required>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Color</label>
-                    <input type="text" class="form-control" id="editColor" required>
+                <div class="edit-form-group">
+                    <label class="edit-form-label">Color</label>
+                    <input type="text" class="edit-form-input" id="editColor" required>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Location</label>
-                    <input type="text" class="form-control" id="editLocation" required>
+                <div class="edit-form-group">
+                    <label class="edit-form-label">Location</label>
+                    <input type="text" class="edit-form-input" id="editLocation" required>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Date</label>
-                    <input type="date" class="form-control" id="editDate" required>
+                <div class="edit-form-group">
+                    <label class="edit-form-label">Date</label>
+                    <input type="date" class="edit-form-input" id="editDate" required>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Image</label>
-                    <div class="image-upload-container" id="imageUploadContainer" onclick="triggerFileInput()">
-                        <p id="uploadText">Click to upload a new image</p>
-                        <input type="file" id="imageFileInput" style="display: none" accept="image/*">
-                        <img id="imagePreview" class="image-preview" style="display: none;">
+                <div class="edit-form-group">
+                    <label class="edit-form-label">Images</label>
+                    <div class="image-upload-container" id="imageUploadContainer">
+                        <div class="image-preview-container" id="imagePreviewContainer"></div>
+                        <p id="uploadText">Click the button to upload images (multiple allowed)</p>
+                        <button type="button" class="upload-image-btn" id="uploadImageBtn">Upload Image</button>
+                        <input type="file" id="imageFileInput" style="display: none" accept="image/*" multiple>
                         <div class="upload-progress" id="uploadProgress">
                             <div class="progress-bar" id="progressBar"></div>
                         </div>
                     </div>
-                    <input type="hidden" id="editImageUrl">
+                    <input type="hidden" id="editImageUrls">
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Contact Name</label>
-                    <input type="text" class="form-control" id="editContactName" required>
+                <div class="edit-form-group">
+                    <label class="edit-form-label">Contact Name</label>
+                    <input type="text" class="edit-form-input" id="editContactName" required>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Contact Phone</label>
-                    <input type="text" class="form-control" id="editContactPhone" required>
+                <div class="edit-form-group">
+                    <label class="edit-form-label">Contact Phone</label>
+                    <input type="text" class="edit-form-input" id="editContactPhone" required>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Contact Email</label>
-                    <input type="email" class="form-control" id="editContactEmail" required>
+                <div class="edit-form-group">
+                    <label class="edit-form-label">Contact Email</label>
+                    <input type="email" class="edit-form-input" id="editContactEmail" required>
                 </div>
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                <div class="edit-form-actions">
+                    <button type="button" class="edit-form-btn edit-form-cancel" onclick="closeEditModal()">Cancel</button>
+                    <button type="submit" class="edit-form-btn edit-form-submit">Save Changes</button>
                 </div>
             </form>
         </div>
@@ -671,6 +948,8 @@
         let allItems = [];
         let searchSuggestions = [];
         let currentItem = null;
+        let uploadedImageUrls = [];
+        window.itemsMap = new Map(); // Store items by ID for safe retrieval
 
         // Function to format date
         function formatDate(dateString) {
@@ -683,51 +962,127 @@
             }
         }
 
+        // Function to validate and convert image URLs to an array
+        function validateImageUrls(imageUrls) {
+            if (!Array.isArray(imageUrls)) {
+                return imageUrls ? [imageUrls] : [];
+            }
+            return imageUrls.filter(url => typeof url === 'string' && url.trim() !== '');
+        }
+
         // Function to show item modal
         function showItemModal(item) {
+            console.log('Showing modal for item:', item); // Debugging
             currentItem = item;
             const modal = document.getElementById('itemModal');
             const modalTitle = document.getElementById('modalItemTitle');
-            const modalImage = document.getElementById('modalItemImage');
+            const modalImagesContainer = document.getElementById('modalImagesContainer');
             const modalDetails = document.getElementById('modalItemDetails');
             const contactName = document.getElementById('contactName');
             const contactPhone = document.getElementById('contactPhone');
             const contactEmail = document.getElementById('contactEmail');
-            
+
             // Set modal content
             modalTitle.textContent = item.itemName || 'Item Details';
-            
-            if (item.imageUrl) {
-                modalImage.src = item.imageUrl;
-                modalImage.style.display = 'block';
+
+            // Handle image display with navigation
+            const rawImageUrls = Array.isArray(item.imageUrls) ? item.imageUrls : (item.imageUrl ? [item.imageUrl] : []);
+            const imageUrls = validateImageUrls(rawImageUrls);
+            console.log('Image URLs:', imageUrls); // Debugging
+            modalImagesContainer.innerHTML = '';
+            modalImagesContainer.dataset.imageUrls = JSON.stringify(imageUrls);
+            modalImagesContainer.dataset.currentIndex = '0';
+
+            if (imageUrls.length > 0) {
+                const img = document.createElement('img');
+                img.src = imageUrls[0];
+                img.className = 'modal-image';
+                img.alt = `${item.itemName || 'Item'} Image 1`;
+                modalImagesContainer.appendChild(img);
+
+                // Add navigation buttons and counter if multiple images
+                if (imageUrls.length > 1) {
+                    modalImagesContainer.innerHTML += `
+                        <button class="modal-nav-button prev" onclick="event.stopPropagation(); navigateModalImage('prev')"><</button>
+                        <button class="modal-nav-button next" onclick="event.stopPropagation(); navigateModalImage('next')">></button>
+                        <span class="modal-image-counter">1/${imageUrls.length}</span>
+                    `;
+                }
             } else {
-                modalImage.style.display = 'none';
+                modalImagesContainer.innerHTML = '<div class="no-image">No images available</div>';
             }
 
             // Set item details
-            const date = item.dateLost || item.dateFound;
+            const date = item.dateLost || item.dateFound || item.timestamp;
             const formattedDate = formatDate(date);
             
             let detailsHtml = `
                 <div><strong>Type:</strong> ${item.type === 'lost' ? 'Lost' : 'Found'}</div>
                 <div><strong>Date:</strong> ${formattedDate}</div>
                 <div><strong>Category:</strong> ${item.category || 'Not specified'}</div>
-                <div><strong>Color:</strong> ${item.primaryColor1 || 'Not specified'}</div>
+                <div><strong>Color:</strong> ${item.primaryColor1 || item.color || 'Not specified'}</div>
                 <div><strong>Location:</strong> ${item.location || 'Unknown'} ${item.additionalLocation ? `(${item.additionalLocation})` : ''}</div>
             `;
             
             modalDetails.innerHTML = detailsHtml;
 
             // Set contact info
-            contactName.textContent = item.fullName || 'Not provided';
-            contactPhone.textContent = item.phoneNumber || 'Not provided';
-            contactEmail.textContent = item.email || 'Not provided';
+            contactName.textContent = item.fullName || item.contactName || 'Not provided';
+            contactPhone.textContent = item.phoneNumber || item.contactPhone || 'Not provided';
+            contactEmail.textContent = item.email || item.contactEmail || 'Not provided';
 
             // Show modal
             modal.style.display = 'flex';
 
             // Update button visibility based on status
             document.getElementById('claimItemBtn').style.display = item.status === 'claimed' ? 'none' : 'block';
+        }
+
+        // Function to navigate images in the newsfeed
+        function navigateImage(itemId, direction) {
+            const container = document.getElementById(`image-container-${itemId}`);
+            let currentIndex = parseInt(container.dataset.currentIndex, 10);
+            const rawImageUrls = JSON.parse(container.dataset.imageUrls);
+            const imageUrls = validateImageUrls(rawImageUrls);
+
+            if (direction === 'next') {
+                currentIndex = (currentIndex + 1) % imageUrls.length;
+            } else if (direction === 'prev') {
+                currentIndex = (currentIndex - 1 + imageUrls.length) % imageUrls.length;
+            }
+
+            container.dataset.currentIndex = currentIndex;
+            const imgElement = container.querySelector('.newsfeed-image');
+            imgElement.src = imageUrls[currentIndex];
+            imgElement.alt = `Item Image ${currentIndex + 1}`;
+
+            const counter = container.querySelector('.image-counter');
+            counter.textContent = `${currentIndex + 1}/${imageUrls.length}`;
+        }
+
+        // Function to navigate images in modal
+        function navigateModalImage(direction) {
+            const container = document.getElementById('modalImagesContainer');
+            let currentIndex = parseInt(container.dataset.currentIndex, 10);
+            const rawImageUrls = JSON.parse(container.dataset.imageUrls);
+            const imageUrls = validateImageUrls(rawImageUrls);
+            
+            if (direction === 'next') {
+                currentIndex = (currentIndex + 1) % imageUrls.length;
+            } else if (direction === 'prev') {
+                currentIndex = (currentIndex - 1 + imageUrls.length) % imageUrls.length;
+            }
+            
+            container.dataset.currentIndex = currentIndex;
+            const imgElement = container.querySelector('.modal-image');
+            imgElement.src = imageUrls[currentIndex];
+            imgElement.alt = `Item Image ${currentIndex + 1}`;
+            
+            // Update counter
+            const counter = container.querySelector('.modal-image-counter');
+            if (counter) {
+                counter.textContent = `${currentIndex + 1}/${imageUrls.length}`;
+            }
         }
 
         // Function to close modal
@@ -739,29 +1094,31 @@
         // Function to close edit modal
         function closeEditModal() {
             document.getElementById('editModal').style.display = 'none';
-            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('imagePreviewContainer').innerHTML = '';
             document.getElementById('uploadProgress').style.display = 'none';
             document.getElementById('progressBar').style.width = '0%';
             document.getElementById('uploadText').style.display = 'block';
+            uploadedImageUrls = [];
+            currentItem = null;
         }
 
-        // Function to show edit modal
-        function showEditModal(item) {
+        // Function to open edit modal
+        function openEditModal(item, event) {
+            if (event) event.stopPropagation();
             if (!item) item = currentItem;
             if (!item) return;
             
             currentItem = item;
             document.getElementById('editItemName').value = item.itemName || '';
             document.getElementById('editCategory').value = item.category || '';
-            document.getElementById('editColor').value = item.primaryColor1 || '';
+            document.getElementById('editColor').value = item.primaryColor1 || item.color || '';
             document.getElementById('editLocation').value = item.location || '';
-            document.getElementById('editContactName').value = item.fullName || '';
-            document.getElementById('editContactPhone').value = item.phoneNumber || '';
-            document.getElementById('editContactEmail').value = item.email || '';
-            document.getElementById('editImageUrl').value = item.imageUrl || '';
+            document.getElementById('editContactName').value = item.fullName || item.contactName || '';
+            document.getElementById('editContactPhone').value = item.phoneNumber || item.contactPhone || '';
+            document.getElementById('editContactEmail').value = item.email || item.contactEmail || '';
             
             // Format date for the date input (YYYY-MM-DD)
-            const itemDate = item.dateLost || item.dateFound;
+            const itemDate = item.dateLost || item.dateFound || item.timestamp;
             if (itemDate) {
                 const dateObj = new Date(itemDate);
                 const year = dateObj.getFullYear();
@@ -769,26 +1126,14 @@
                 const day = String(dateObj.getDate()).padStart(2, '0');
                 document.getElementById('editDate').value = `${year}-${month}-${day}`;
             } else {
-                // Set default date to today if no date is available
-                const today = new Date();
-                const year = today.getFullYear();
-                const month = String(today.getMonth() + 1).padStart(2, '0');
-                const day = String(today.getDate()).padStart(2, '0');
-                document.getElementById('editDate').value = `${year}-${month}-${day}`;
+                document.getElementById('editDate').value = '';
             }
             
-            // Show image preview if available
-            const imagePreview = document.getElementById('imagePreview');
-            const uploadText = document.getElementById('uploadText');
-            
-            if (item.imageUrl) {
-                imagePreview.src = item.imageUrl;
-                imagePreview.style.display = 'block';
-                uploadText.style.display = 'none';
-            } else {
-                imagePreview.style.display = 'none';
-                uploadText.style.display = 'block';
-            }
+            // Load existing images
+            const rawImageUrls = Array.isArray(item.imageUrls) ? item.imageUrls : (item.imageUrl ? [item.imageUrl] : []);
+            uploadedImageUrls = validateImageUrls(rawImageUrls);
+            document.getElementById('editImageUrls').value = JSON.stringify(uploadedImageUrls);
+            updateImagePreviews();
             
             document.getElementById('editModal').style.display = 'flex';
         }
@@ -800,93 +1145,142 @@
 
         // Function to handle file selection
         function handleFileSelect(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            // Show preview immediately
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const imagePreview = document.getElementById('imagePreview');
-                imagePreview.src = e.target.result;
-                imagePreview.style.display = 'block';
-                document.getElementById('uploadText').style.display = 'none';
-            };
-            reader.readAsDataURL(file);
+            const files = Array.from(event.target.files);
+            if (!files.length) return;
             
             // Show loading overlay
             document.getElementById('loadingOverlay').style.display = 'flex';
             
-            // Upload to ImgBB directly (more reliable than Firebase Storage for this use case)
-            uploadToImgBB(file);
+            // Upload multiple images
+            uploadImages(files);
+        }
+
+        // Function to update image previews in edit modal
+        function updateImagePreviews() {
+            const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+            const uploadText = document.getElementById('uploadText');
+            
+            imagePreviewContainer.innerHTML = '';
+            if (uploadedImageUrls.length > 0) {
+                uploadedImageUrls.forEach((url, index) => {
+                    const imgWrapper = document.createElement('div');
+                    imgWrapper.className = 'image-preview-wrapper';
+                    imgWrapper.style.position = 'relative';
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.className = 'image-preview';
+                    img.alt = `Preview ${index + 1}`;
+                    
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'remove-image-btn';
+                    removeBtn.innerHTML = '×';
+                    removeBtn.onclick = () => {
+                        uploadedImageUrls.splice(index, 1);
+                        updateImagePreviews();
+                        document.getElementById('editImageUrls').value = JSON.stringify(uploadedImageUrls);
+                    };
+                    
+                    imgWrapper.appendChild(img);
+                    imgWrapper.appendChild(removeBtn);
+                    imagePreviewContainer.appendChild(imgWrapper);
+                });
+                uploadText.style.display = 'none';
+            } else {
+                uploadText.style.display = 'block';
+            }
+            document.getElementById('editImageUrls').value = JSON.stringify(uploadedImageUrls);
+        }
+
+        // Function to upload multiple images
+        async function uploadImages(files) {
+            const uploadProgress = document.getElementById('uploadProgress');
+            const progressBar = document.getElementById('progressBar');
+            uploadProgress.style.display = 'block';
+            
+            try {
+                const newUrls = [];
+                for (const file of files) {
+                    // Reset progress for each file
+                    progressBar.style.width = '0%';
+                    
+                    // Simulate progress
+                    let progress = 0;
+                    const progressInterval = setInterval(() => {
+                        progress += 5;
+                        if (progress > 90) clearInterval(progressInterval);
+                        progressBar.style.width = `${progress}%`;
+                    }, 100);
+                    
+                    try {
+                        // Try ImgBB first
+                        const url = await uploadToImgBB(file);
+                        if (url) {
+                            newUrls.push(url);
+                            progressBar.style.width = '100%';
+                            clearInterval(progressInterval);
+                        }
+                    } catch (error) {
+                        console.error('ImgBB upload failed for:', file.name, error);
+                        // Fallback to Firebase Storage
+                        const fbUrl = await uploadToFirebaseStorage(file);
+                        if (fbUrl) {
+                            newUrls.push(fbUrl);
+                            progressBar.style.width = '100%';
+                            clearInterval(progressInterval);
+                        }
+                    }
+                }
+                
+                uploadedImageUrls = [...uploadedImageUrls, ...newUrls];
+                updateImagePreviews();
+            } catch (error) {
+                console.error('Error uploading images:', error);
+                alert('Failed to upload some images. Please try again.');
+            } finally {
+                uploadProgress.style.display = 'none';
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }
         }
 
         // Function to upload image to ImgBB
         async function uploadToImgBB(file) {
-            const apiKey = '9b0dc76f6c3bb19d9effe36ecdc9ed87'; // ImgBB API key
+            const apiKey = '9b0dc76f6c3bb19d9effe36ecdc9ed87';
             const formData = new FormData();
             formData.append('image', file);
             
-            // Show progress bar
-            const uploadProgress = document.getElementById('uploadProgress');
-            const progressBar = document.getElementById('progressBar');
-            uploadProgress.style.display = 'block';
-            progressBar.style.width = '0%';
-            
             try {
-                // Simulate upload progress
-                let progress = 0;
-                const progressInterval = setInterval(() => {
-                    progress += 5;
-                    if (progress > 90) clearInterval(progressInterval);
-                    progressBar.style.width = `${progress}%`;
-                }, 100);
-                
-                // Upload to ImgBB
                 const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
                     method: 'POST',
                     body: formData
                 });
-                
-                clearInterval(progressInterval);
                 
                 if (!response.ok) {
                     throw new Error('Failed to upload image to ImgBB');
                 }
                 
                 const data = await response.json();
-                
-                // Complete progress bar
-                progressBar.style.width = '100%';
-                
-                // Set image URL
                 if (data.data && data.data.url) {
-                    document.getElementById('editImageUrl').value = data.data.url;
-                    console.log('Image uploaded successfully to ImgBB:', data.data.url);
-                    
-                    // Update the preview with the actual URL from ImgBB
-                    const imagePreview = document.getElementById('imagePreview');
-                    imagePreview.src = data.data.url;
-                    imagePreview.style.display = 'block';
-                    document.getElementById('uploadText').style.display = 'none';
+                    return data.data.url;
                 }
-                
-                // Hide loading overlay
-                document.getElementById('loadingOverlay').style.display = 'none';
-                
-                return data.data.url;
+                throw new Error('No URL returned from ImgBB');
             } catch (error) {
                 console.error('Error uploading to ImgBB:', error);
-                
-                // Show error message
-                alert('Failed to upload image. Please try again.');
-                
-                // Hide progress bar
-                uploadProgress.style.display = 'none';
-                
-                // Hide loading overlay
-                document.getElementById('loadingOverlay').style.display = 'none';
-                
-                return null;
+                throw error;
+            }
+        }
+
+        // Function to upload image to Firebase Storage (fallback)
+        async function uploadToFirebaseStorage(file) {
+            try {
+                const timestamp = new Date().getTime();
+                const fileName = `item_images/${timestamp}_${file.name}`;
+                const fileRef = storageRef(storage, fileName);
+                const snapshot = await uploadBytes(fileRef, file);
+                const downloadURL = await getDownloadURL(fileRef);
+                return downloadURL;
+            } catch (error) {
+                console.error('Error uploading to Firebase Storage:', error);
+                throw error;
             }
         }
 
@@ -896,7 +1290,6 @@
             
             if (!currentItem) return;
             
-            // Show loading overlay
             document.getElementById('loadingOverlay').style.display = 'flex';
             
             try {
@@ -907,10 +1300,10 @@
                     location: document.getElementById('editLocation').value,
                     fullName: document.getElementById('editContactName').value,
                     phoneNumber: document.getElementById('editContactPhone').value,
-                    email: document.getElementById('editContactEmail').value
+                    email: document.getElementById('editContactEmail').value,
+                    imageUrls: JSON.parse(document.getElementById('editImageUrls').value || '[]')
                 };
 
-                // Update the appropriate date field based on item type
                 const newDate = document.getElementById('editDate').value;
                 if (newDate) {
                     if (currentItem.type === 'lost') {
@@ -919,25 +1312,18 @@
                         updates.dateFound = new Date(newDate).toISOString();
                     }
                 }
-
-                // Only update image URL if a new one was provided
-                const newImageUrl = document.getElementById('editImageUrl').value.trim();
-                if (newImageUrl) {
-                    updates.imageUrl = newImageUrl;
-                }
                 
                 const itemRef = ref(db, `${currentItem.type}Items/${currentItem.id}`);
                 await update(itemRef, updates);
                 
                 closeEditModal();
                 closeModal();
-                loadAllItems(); // Refresh the list
+                loadAllItems();
                 alert('Item updated successfully!');
             } catch (error) {
                 console.error('Error updating item:', error);
                 alert('Failed to update item. Please try again.');
             } finally {
-                // Hide loading overlay
                 document.getElementById('loadingOverlay').style.display = 'none';
             }
         }
@@ -946,33 +1332,29 @@
         async function deleteItem() {
             if (!currentItem || !confirm('Are you sure you want to delete this item?')) return;
             
-            // Show loading overlay
             document.getElementById('loadingOverlay').style.display = 'flex';
             
             try {
                 const itemRef = ref(db, `${currentItem.type}Items/${currentItem.id}`);
                 await remove(itemRef);
                 closeModal();
-                loadAllItems(); // Refresh the list
+                loadAllItems();
                 alert('Item deleted successfully!');
             } catch (error) {
                 console.error('Error deleting item:', error);
                 alert('Failed to delete item. Please try again.');
             } finally {
-                // Hide loading overlay
                 document.getElementById('loadingOverlay').style.display = 'none';
             }
         }
 
-        // Function to mark item as claimed (moves to claimedItems and deletes from original)
+        // Function to mark item as claimed
         async function markAsClaimed() {
             if (!currentItem || !confirm('Mark this item as claimed and move to claimed items?')) return;
             
-            // Show loading overlay
             document.getElementById('loadingOverlay').style.display = 'flex';
             
             try {
-                // 1. Get the complete item data
                 const itemRef = ref(db, `${currentItem.type}Items/${currentItem.id}`);
                 const snapshot = await get(itemRef);
                 const itemData = snapshot.val();
@@ -981,7 +1363,6 @@
                     throw new Error('Item not found');
                 }
                 
-                // 2. Add to claimed items database
                 const claimedRef = ref(db, 'claimedItems');
                 const newClaimedRef = push(claimedRef);
                 await set(newClaimedRef, {
@@ -991,23 +1372,22 @@
                     originalType: currentItem.type
                 });
                 
-                // 3. Remove from original location
                 await remove(itemRef);
                 
                 closeModal();
-                loadAllItems(); // Refresh the list
+                loadAllItems();
                 alert('Item successfully moved to claimed items!');
             } catch (error) {
                 console.error('Error claiming item:', error);
                 alert('Failed to mark item as claimed. Please try again.');
             } finally {
-                // Hide loading overlay
                 document.getElementById('loadingOverlay').style.display = 'none';
             }
         }
 
         // Function to render items with admin controls
         function renderItems(items, containerId, type) {
+            console.log(`Rendering ${type} items:`, items); // Debugging
             const container = document.getElementById(containerId);
             
             if (items.length === 0) {
@@ -1018,16 +1398,22 @@
 
             let html = '';
             items.forEach(item => {
-                const date = item.dateLost || item.dateFound;
+                const date = item.dateLost || item.dateFound || item.timestamp;
                 const formattedDate = formatDate(date);
                 
+                const rawImageUrls = Array.isArray(item.imageUrls) ? item.imageUrls : (item.imageUrl ? [item.imageUrl] : []);
+                const imageUrls = validateImageUrls(rawImageUrls);
+
+                // Store the item in the global map
+                window.itemsMap.set(item.id, item);
+
                 html += `
-                    <div class="newsfeed-item">
+                    <div class="newsfeed-item" data-item-id="${item.id}">
                         <div class="admin-controls">
-                            <button class="admin-btn edit-btn" onclick="showEditModal(${JSON.stringify(item).replace(/"/g, '&quot;')})">Edit</button>
-                            <button class="admin-btn delete-btn" onclick="handleDeleteItem('${item.type}', '${item.id}')">Delete</button>
+                            <button class="admin-btn edit-btn" onclick="openEditModal(window.itemsMap.get('${item.id}'), event)">Edit</button>
+                            <button class="admin-btn delete-btn" onclick="handleDeleteItem('${item.type}', '${item.id}', event)">Delete</button>
                             ${item.status !== 'claimed' ? 
-                                `<button class="admin-btn claim-btn" onclick="handleClaimItem('${item.type}', '${item.id}')">Claim</button>` : ''}
+                                `<button class="admin-btn claim-btn" onclick="handleClaimItem('${item.type}', '${item.id}', event)">Claim</button>` : ''}
                         </div>
                         <div class="newsfeed-header">
                             <span class="newsfeed-type ${type === 'lost' ? 'type-lost' : 'type-found'}">
@@ -1039,11 +1425,16 @@
                         <div class="newsfeed-details">
                             <span>${item.category || 'No category'}</span>
                             <span>•</span>
-                            <span>${item.primaryColor1 || 'No color specified'}</span>
+                            <span>${item.primaryColor1 || item.color || 'No color specified'}</span>
                         </div>
-                        <div class="newsfeed-image-container" onclick="showItemModal(${JSON.stringify(item).replace(/"/g, '&quot;')})">
-                            ${item.imageUrl ? `
-                                <img src="${item.imageUrl}" alt="${item.itemName}" class="newsfeed-image">
+                        <div class="newsfeed-image-container" id="image-container-${item.id}" data-image-urls='${JSON.stringify(imageUrls)}' data-current-index="0">
+                            ${imageUrls.length > 0 ? `
+                                <img src="${imageUrls[0]}" alt="${item.itemName || 'Item'} Image 1" class="newsfeed-image" onclick="showItemModal(window.itemsMap.get('${item.id}'))">
+                                ${imageUrls.length > 1 ? `
+                                    <button class="nav-button prev" onclick="event.stopPropagation(); navigateImage('${item.id}', 'prev')"><</button>
+                                    <button class="nav-button next" onclick="event.stopPropagation(); navigateImage('${item.id}', 'next')">></button>
+                                    <span class="image-counter">1/${imageUrls.length}</span>
+                                ` : ''}
                             ` : `
                                 <div class="no-image">No image available</div>
                             `}
@@ -1061,12 +1452,32 @@
 
             container.innerHTML = html;
             document.getElementById(`${type}Count`).textContent = `${items.length} items`;
+
+            // Attach click event to each newsfeed item for opening the modal
+            document.querySelectorAll(`#${containerId} .newsfeed-item`).forEach(itemElement => {
+                itemElement.addEventListener('click', (e) => {
+                    if (
+                        e.target.closest('.admin-controls') ||
+                        e.target.classList.contains('nav-button') ||
+                        e.target.classList.contains('newsfeed-image')
+                    ) {
+                        return;
+                    }
+                    const itemId = itemElement.dataset.itemId;
+                    const item = window.itemsMap.get(itemId);
+                    console.log(`Clicked ${type} item with ID ${itemId}:`, item); // Debugging
+                    showItemModal(item);
+                });
+            });
         }
 
         // Function to load all items
         function loadAllItems() {
             const lostItemsRef = ref(db, 'lostItems');
             const foundItemsRef = ref(db, 'foundItems');
+
+            // Clear itemsMap before loading new data
+            window.itemsMap.clear();
 
             onValue(lostItemsRef, (lostSnapshot) => {
                 onValue(foundItemsRef, (foundSnapshot) => {
@@ -1097,8 +1508,8 @@
                     }
                     
                     // Sort by timestamp (newest first)
-                    lostItems.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
-                    foundItems.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+                    lostItems.sort((a, b) => new Date(b.timestamp || b.dateLost || 0) - new Date(a.timestamp || a.dateLost || 0));
+                    foundItems.sort((a, b) => new Date(b.timestamp || b.dateFound || 0) - new Date(a.timestamp || a.dateFound || 0));
 
                     // Render items
                     renderItems(lostItems, 'lostItemsFeed', 'lost');
@@ -1154,7 +1565,6 @@
         // Function to filter items by search term
         function filterItems(searchTerm) {
             if (!searchTerm || searchTerm.length < 2) {
-                // Reset to show all items if search is empty
                 loadAllItems();
                 return;
             }
@@ -1176,35 +1586,33 @@
         }
 
         // Handle delete item
-        async function handleDeleteItem(type, id) {
+        async function handleDeleteItem(type, id, event) {
+            event.stopPropagation();
             if (!confirm('Are you sure you want to delete this item?')) return;
             
-            // Show loading overlay
             document.getElementById('loadingOverlay').style.display = 'flex';
             
             try {
                 const itemRef = ref(db, `${type}Items/${id}`);
                 await remove(itemRef);
-                loadAllItems(); // Refresh the list
+                loadAllItems();
                 alert('Item deleted successfully!');
             } catch (error) {
                 console.error('Error deleting item:', error);
                 alert('Failed to delete item. Please try again.');
             } finally {
-                // Hide loading overlay
                 document.getElementById('loadingOverlay').style.display = 'none';
             }
         }
 
-        // Handle claim item (moves to claimedItems and deletes from original)
-        async function handleClaimItem(type, id) {
+        // Handle claim item
+        async function handleClaimItem(type, id, event) {
+            event.stopPropagation();
             if (!confirm('Mark this item as claimed and move to claimed items?')) return;
             
-            // Show loading overlay
             document.getElementById('loadingOverlay').style.display = 'flex';
             
             try {
-                // 1. Get the item first
                 const itemRef = ref(db, `${type}Items/${id}`);
                 const snapshot = await get(itemRef);
                 const itemData = snapshot.val();
@@ -1213,7 +1621,6 @@
                     throw new Error('Item not found');
                 }
                 
-                // 2. Add to claimed items
                 const claimedRef = ref(db, 'claimedItems');
                 const newClaimedRef = push(claimedRef);
                 
@@ -1224,33 +1631,28 @@
                     originalType: type
                 });
                 
-                // 3. Remove from original location
                 await remove(itemRef);
                 
-                loadAllItems(); // Refresh the list
+                loadAllItems();
                 alert('Item marked as claimed and moved to claimed items!');
             } catch (error) {
                 console.error('Error claiming item:', error);
                 alert('Failed to mark item as claimed. Please try again.');
             } finally {
-                // Hide loading overlay
                 document.getElementById('loadingOverlay').style.display = 'none';
             }
         }
 
         // Event listeners
         document.addEventListener('DOMContentLoaded', function() {
-            // Load all items
             loadAllItems();
             
-            // Search input event
             document.getElementById('searchInput').addEventListener('input', (e) => {
                 const searchTerm = e.target.value.trim();
                 showSuggestions(searchTerm);
                 filterItems(searchTerm);
             });
 
-            // Search suggestions click
             document.getElementById('searchSuggestions').addEventListener('click', (e) => {
                 if (e.target.classList.contains('suggestion-item')) {
                     const searchTerm = e.target.textContent;
@@ -1260,27 +1662,21 @@
                 }
             });
 
-            // Hide suggestions when clicking outside
             document.addEventListener('click', (e) => {
                 if (!e.target.closest('.search-container')) {
                     document.getElementById('searchSuggestions').style.display = 'none';
                 }
             });
 
-            // File input change
             document.getElementById('imageFileInput').addEventListener('change', handleFileSelect);
-            
-            // Form submission
             document.getElementById('editItemForm').addEventListener('submit', saveEditedItem);
-            
-            // Button event listeners
             document.getElementById('claimItemBtn').addEventListener('click', markAsClaimed);
             document.getElementById('deleteItemBtn').addEventListener('click', deleteItem);
             document.getElementById('editItemBtn').addEventListener('click', function() {
-                showEditModal(currentItem);
+                openEditModal(currentItem);
             });
+            document.getElementById('uploadImageBtn').addEventListener('click', triggerFileInput);
 
-            // Close modals when clicking outside
             document.getElementById('itemModal').addEventListener('click', (e) => {
                 if (e.target === document.getElementById('itemModal')) {
                     closeModal();
@@ -1296,12 +1692,14 @@
 
         // Make functions available globally
         window.showItemModal = showItemModal;
-        window.showEditModal = showEditModal;
+        window.openEditModal = openEditModal;
         window.closeModal = closeModal;
         window.closeEditModal = closeEditModal;
         window.handleDeleteItem = handleDeleteItem;
         window.handleClaimItem = handleClaimItem;
         window.triggerFileInput = triggerFileInput;
+        window.navigateImage = navigateImage;
+        window.navigateModalImage = navigateModalImage;
         window.logout = function() {
             window.location.href = 'index.html';
         }
