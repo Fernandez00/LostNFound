@@ -140,6 +140,7 @@
             margin-bottom: 1.5rem;
             border-bottom: 1px solid #eee;
             padding-bottom: 1.5rem;
+            cursor: pointer;
         }
 
         .newsfeed-item:last-child {
@@ -185,18 +186,74 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            cursor: pointer;
+            position: relative;
         }
 
         .newsfeed-image {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
+            cursor: pointer;
         }
 
         .no-image {
             color: var(--text-light);
             font-style: italic;
+        }
+
+        .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .newsfeed-image-container:hover .nav-button {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .nav-button:hover {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        .nav-button.prev {
+            left: 10px;
+        }
+
+        .nav-button.next {
+            right: 10px;
+        }
+
+        .image-counter {
+            position: absolute;
+            bottom: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .newsfeed-image-container:hover .image-counter {
+            opacity: 1;
+            visibility: visible;
         }
 
         .newsfeed-title {
@@ -231,7 +288,6 @@
             margin-top: 0.5rem;
         }
 
-
         .status-claimed {
             background-color: #55efc4;
             color: #006266;
@@ -262,9 +318,11 @@
             border-radius: 12px;
             width: 90%;
             max-width: 500px;
+            max-height: 90vh;
             padding: 2rem;
             box-shadow: var(--shadow);
             position: relative;
+            overflow-y: auto;
         }
 
         .modal-close {
@@ -274,6 +332,8 @@
             font-size: 1.5rem;
             cursor: pointer;
             color: var(--text-light);
+            background: none;
+            border: none;
         }
 
         .modal-title {
@@ -282,16 +342,103 @@
             color: var(--text);
         }
 
-        .modal-image {
+        .modal-images-container {
+            position: relative;
             width: 100%;
-            max-height: 300px;
+            max-height: 200px;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f5f6fa;
+            border-radius: 8px;
+            padding: 5px;
+            overflow: hidden;
+        }
+
+        .modal-image {
+            max-width: 100%;
+            max-height: 190px;
             object-fit: contain;
             border-radius: 8px;
+        }
+
+        .modal-nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: background-color 0.3s;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .modal-images-container:hover .modal-nav-button {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-nav-button:hover {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        .modal-nav-button.prev {
+            left: 10px;
+        }
+
+        .modal-nav-button.next {
+            right: 10px;
+        }
+
+        .modal-image-counter {
+            position: absolute;
+            bottom: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .modal-images-container:hover .modal-image-counter {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-details {
             margin-bottom: 1rem;
+        }
+
+        .modal-details div {
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-details strong {
+            display: inline-block;
+            width: 80px;
+            font-weight: 500;
         }
 
         .contact-info {
             margin-top: 1.5rem;
+        }
+
+        .contact-info h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
         }
 
         .contact-item {
@@ -324,7 +471,17 @@
 
             .modal-content {
                 width: 95%;
-                padding: 1.5rem;
+                padding: 1rem;
+            }
+
+            .modal-image {
+                max-height: 160px;
+            }
+
+            .modal-nav-button {
+                width: 30px;
+                height: 30px;
+                font-size: 14px;
             }
         }
     </style>
@@ -359,10 +516,10 @@
     <!-- Contact Info Modal -->
     <div class="modal" id="contactModal">
         <div class="modal-content">
-            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <button class="modal-close" onclick="closeModal()">×</button>
             <h3 class="modal-title" id="modalItemTitle">Item Details</h3>
-            <img id="modalItemImage" class="modal-image" src="" alt="Item Image">
-            <div id="modalItemDetails"></div>
+            <div class="modal-images-container" id="modalImagesContainer"></div>
+            <div class="modal-details" id="modalItemDetails"></div>
             <div class="contact-info">
                 <h4>Contact Information</h4>
                 <div class="contact-item">
@@ -402,6 +559,7 @@
         // Global variables
         let allItems = [];
         let searchSuggestions = [];
+        window.itemsMap = new Map(); // Store items by ID for safe retrieval
 
         // Function to format date
         function formatDate(dateString) {
@@ -414,11 +572,19 @@
             }
         }
 
+        // Function to validate and convert image URLs to an array
+        function validateImageUrls(imageUrls) {
+            if (!Array.isArray(imageUrls)) {
+                return imageUrls ? [imageUrls] : [];
+            }
+            return imageUrls.filter(url => typeof url === 'string' && url.trim() !== '');
+        }
+
         // Function to show contact modal
         function showContactModal(item) {
             const modal = document.getElementById('contactModal');
             const modalTitle = document.getElementById('modalItemTitle');
-            const modalImage = document.getElementById('modalItemImage');
+            const modalImagesContainer = document.getElementById('modalImagesContainer');
             const modalDetails = document.getElementById('modalItemDetails');
             const contactName = document.getElementById('contactName');
             const contactPhone = document.getElementById('contactPhone');
@@ -426,35 +592,101 @@
 
             // Set modal content
             modalTitle.textContent = item.itemName || 'Item Details';
-            
-            if (item.imageUrl) {
-                modalImage.src = item.imageUrl;
-                modalImage.style.display = 'block';
+
+            // Handle image display with navigation
+            const rawImageUrls = Array.isArray(item.imageUrls) ? item.imageUrls : (item.imageUrl ? [item.imageUrl] : []);
+            const imageUrls = validateImageUrls(rawImageUrls);
+            modalImagesContainer.innerHTML = '';
+            modalImagesContainer.dataset.imageUrls = JSON.stringify(imageUrls);
+            modalImagesContainer.dataset.currentIndex = '0';
+
+            if (imageUrls.length > 0) {
+                const img = document.createElement('img');
+                img.src = imageUrls[0];
+                img.className = 'modal-image';
+                img.alt = `${item.itemName || 'Item'} Image 1`;
+                modalImagesContainer.appendChild(img);
+
+                // Add navigation buttons and counter if multiple images
+                if (imageUrls.length > 1) {
+                    modalImagesContainer.innerHTML += `
+                        <button class="modal-nav-button prev" onclick="event.stopPropagation(); navigateModalImage('prev')"><</button>
+                        <button class="modal-nav-button next" onclick="event.stopPropagation(); navigateModalImage('next')">></button>
+                        <span class="modal-image-counter">1/${imageUrls.length}</span>
+                    `;
+                }
             } else {
-                modalImage.style.display = 'none';
+                modalImagesContainer.innerHTML = '<div class="no-image">No images available</div>';
             }
 
             // Set item details
-            const date = item.dateLost || item.dateFound;
+            const date = item.dateLost || item.dateFound || item.timestamp;
             const formattedDate = formatDate(date);
             
             let detailsHtml = `
                 <div><strong>Type:</strong> ${item.type === 'lost' ? 'Lost' : 'Found'}</div>
                 <div><strong>Date:</strong> ${formattedDate}</div>
                 <div><strong>Category:</strong> ${item.category || 'Not specified'}</div>
-                <div><strong>Color:</strong> ${item.primaryColor1 || 'Not specified'}</div>
+                <div><strong>Color:</strong> ${item.primaryColor1 || item.color || 'Not specified'}</div>
                 <div><strong>Location:</strong> ${item.location || 'Unknown'} ${item.additionalLocation ? `(${item.additionalLocation})` : ''}</div>
             `;
             
             modalDetails.innerHTML = detailsHtml;
 
             // Set contact info
-            contactName.textContent = item.fullName || 'Not provided';
-            contactPhone.textContent = item.phoneNumber || 'Not provided';
-            contactEmail.textContent = item.email || 'Not provided';
+            contactName.textContent = item.fullName || item.contactName || 'Not provided';
+            contactPhone.textContent = item.phoneNumber || item.contactPhone || 'Not provided';
+            contactEmail.textContent = item.email || item.contactEmail || 'Not provided';
 
             // Show modal
             modal.style.display = 'flex';
+        }
+
+        // Function to navigate images in the newsfeed
+        function navigateImage(itemId, direction) {
+            const container = document.getElementById(`image-container-${itemId}`);
+            let currentIndex = parseInt(container.dataset.currentIndex, 10);
+            const rawImageUrls = JSON.parse(container.dataset.imageUrls);
+            const imageUrls = validateImageUrls(rawImageUrls);
+
+            if (direction === 'next') {
+                currentIndex = (currentIndex + 1) % imageUrls.length;
+            } else if (direction === 'prev') {
+                currentIndex = (currentIndex - 1 + imageUrls.length) % imageUrls.length;
+            }
+
+            container.dataset.currentIndex = currentIndex;
+            const imgElement = container.querySelector('.newsfeed-image');
+            imgElement.src = imageUrls[currentIndex];
+            imgElement.alt = `Item Image ${currentIndex + 1}`;
+
+            const counter = container.querySelector('.image-counter');
+            counter.textContent = `${currentIndex + 1}/${imageUrls.length}`;
+        }
+
+        // Function to navigate images in modal
+        function navigateModalImage(direction) {
+            const container = document.getElementById('modalImagesContainer');
+            let currentIndex = parseInt(container.dataset.currentIndex, 10);
+            const rawImageUrls = JSON.parse(container.dataset.imageUrls);
+            const imageUrls = validateImageUrls(rawImageUrls);
+            
+            if (direction === 'next') {
+                currentIndex = (currentIndex + 1) % imageUrls.length;
+            } else if (direction === 'prev') {
+                currentIndex = (currentIndex - 1 + imageUrls.length) % imageUrls.length;
+            }
+            
+            container.dataset.currentIndex = currentIndex;
+            const imgElement = container.querySelector('.modal-image');
+            imgElement.src = imageUrls[currentIndex];
+            imgElement.alt = `Item Image ${currentIndex + 1}`;
+            
+            // Update counter
+            const counter = container.querySelector('.modal-image-counter');
+            if (counter) {
+                counter.textContent = `${currentIndex + 1}/${imageUrls.length}`;
+            }
         }
 
         // Function to close modal
@@ -468,16 +700,23 @@
             
             if (items.length === 0) {
                 container.innerHTML = '<div class="empty-state">No ' + type + ' items found</div>';
+                document.getElementById(`${type}Count`).textContent = '0 items';
                 return;
             }
 
             let html = '';
             items.forEach(item => {
-                const date = item.dateLost || item.dateFound;
+                const date = item.dateLost || item.dateFound || item.timestamp;
                 const formattedDate = formatDate(date);
                 
+                const rawImageUrls = Array.isArray(item.imageUrls) ? item.imageUrls : (item.imageUrl ? [item.imageUrl] : []);
+                const imageUrls = validateImageUrls(rawImageUrls);
+
+                // Store the item in the global map
+                window.itemsMap.set(item.id, item);
+
                 html += `
-                    <div class="newsfeed-item">
+                    <div class="newsfeed-item" data-item-id="${item.id}">
                         <div class="newsfeed-header">
                             <span class="newsfeed-type ${type === 'lost' ? 'type-lost' : 'type-found'}">
                                 ${type === 'lost' ? 'Lost' : 'Found'}
@@ -488,11 +727,16 @@
                         <div class="newsfeed-details">
                             <span>${item.category || 'No category'}</span>
                             <span>•</span>
-                            <span>${item.primaryColor1 || 'No color specified'}</span>
+                            <span>${item.primaryColor1 || item.color || 'No color specified'}</span>
                         </div>
-                        <div class="newsfeed-image-container" onclick="showContactModal(${JSON.stringify(item).replace(/"/g, '&quot;')})">
-                            ${item.imageUrl ? `
-                                <img src="${item.imageUrl}" alt="${item.itemName}" class="newsfeed-image">
+                        <div class="newsfeed-image-container" id="image-container-${item.id}" data-image-urls='${JSON.stringify(imageUrls)}' data-current-index="0">
+                            ${imageUrls.length > 0 ? `
+                                <img src="${imageUrls[0]}" alt="${item.itemName || 'Item'} Image 1" class="newsfeed-image" onclick="showContactModal(window.itemsMap.get('${item.id}'))">
+                                ${imageUrls.length > 1 ? `
+                                    <button class="nav-button prev" onclick="event.stopPropagation(); navigateImage('${item.id}', 'prev')"><</button>
+                                    <button class="nav-button next" onclick="event.stopPropagation(); navigateImage('${item.id}', 'next')">></button>
+                                    <span class="image-counter">1/${imageUrls.length}</span>
+                                ` : ''}
                             ` : `
                                 <div class="no-image">No image available</div>
                             `}
@@ -510,12 +754,30 @@
 
             container.innerHTML = html;
             document.getElementById(`${type}Count`).textContent = `${items.length} items`;
+
+            // Attach click event to each newsfeed item for opening the modal
+            document.querySelectorAll(`#${containerId} .newsfeed-item`).forEach(itemElement => {
+                itemElement.addEventListener('click', (e) => {
+                    if (
+                        e.target.classList.contains('nav-button') ||
+                        e.target.classList.contains('newsfeed-image')
+                    ) {
+                        return;
+                    }
+                    const itemId = itemElement.dataset.itemId;
+                    const item = window.itemsMap.get(itemId);
+                    showContactModal(item);
+                });
+            });
         }
 
         // Function to load all items
         function loadAllItems() {
             const lostItemsRef = ref(db, 'lostItems');
             const foundItemsRef = ref(db, 'foundItems');
+
+            // Clear itemsMap before loading new data
+            window.itemsMap.clear();
 
             onValue(lostItemsRef, (lostSnapshot) => {
                 onValue(foundItemsRef, (foundSnapshot) => {
@@ -546,8 +808,8 @@
                     }
                     
                     // Sort by timestamp (newest first)
-                    lostItems.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                    foundItems.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    lostItems.sort((a, b) => new Date(b.timestamp || b.dateLost || 0) - new Date(a.timestamp || a.dateLost || 0));
+                    foundItems.sort((a, b) => new Date(b.timestamp || b.dateFound || 0) - new Date(a.timestamp || a.dateFound || 0));
 
                     // Render items
                     renderItems(lostItems, 'lostItemsFeed', 'lost');
@@ -603,7 +865,6 @@
         // Function to filter items by search term
         function filterItems(searchTerm) {
             if (!searchTerm || searchTerm.length < 2) {
-                // Reset to show all items if search is empty
                 loadAllItems();
                 return;
             }
@@ -625,40 +886,42 @@
         }
 
         // Event listeners
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            const searchTerm = e.target.value.trim();
-            showSuggestions(searchTerm);
-            filterItems(searchTerm);
-        });
-
-        document.getElementById('searchSuggestions').addEventListener('click', (e) => {
-            if (e.target.classList.contains('suggestion-item')) {
-                const searchTerm = e.target.textContent;
-                document.getElementById('searchInput').value = searchTerm;
-                document.getElementById('searchSuggestions').style.display = 'none';
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAllItems();
+            
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                const searchTerm = e.target.value.trim();
+                showSuggestions(searchTerm);
                 filterItems(searchTerm);
-            }
-        });
+            });
 
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.search-container')) {
-                document.getElementById('searchSuggestions').style.display = 'none';
-            }
-        });
+            document.getElementById('searchSuggestions').addEventListener('click', (e) => {
+                if (e.target.classList.contains('suggestion-item')) {
+                    const searchTerm = e.target.textContent;
+                    document.getElementById('searchInput').value = searchTerm;
+                    document.getElementById('searchSuggestions').style.display = 'none';
+                    filterItems(searchTerm);
+                }
+            });
 
-        // Close modal when clicking outside
-        document.getElementById('contactModal').addEventListener('click', (e) => {
-            if (e.target === document.getElementById('contactModal')) {
-                closeModal();
-            }
-        });
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-container')) {
+                    document.getElementById('searchSuggestions').style.display = 'none';
+                }
+            });
 
-        // Load all items when page loads
-        document.addEventListener('DOMContentLoaded', loadAllItems);
+            document.getElementById('contactModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('contactModal')) {
+                    closeModal();
+                }
+            });
+        });
 
         // Make functions available globally
         window.showContactModal = showContactModal;
         window.closeModal = closeModal;
+        window.navigateImage = navigateImage;
+        window.navigateModalImage = navigateModalImage;
         window.logout = function() {
             window.location.href = 'student.html';
         }
