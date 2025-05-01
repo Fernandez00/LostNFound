@@ -321,18 +321,18 @@
             </div>
             <div class="chart-card">
                 <div class="chart-card-header">
-                    <h3 class="chart-card-title">Items by Status</h3>
-                </div>
-                <div class="chart-container">
-                    <canvas id="statusChart"></canvas>
-                </div>
-            </div>
-            <div class="chart-card">
-                <div class="chart-card-header">
                     <h3 class="chart-card-title">Items Over Time</h3>
                 </div>
                 <div class="chart-container">
                     <canvas id="timelineChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-card-header">
+                    <h3 class="chart-card-title">Claimed Items by Type</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="claimedItemsChart"></canvas>
                 </div>
             </div>
         </div>
@@ -345,7 +345,6 @@
                         <th>Date</th>
                         <th>Item</th>
                         <th>Type</th>
-                        <th>Status</th>
                         <th>Location</th>
                     </tr>
                 </thead>
@@ -376,8 +375,9 @@
 
         // Global variables
         let allItems = [];
+        let claimedItems = [];
         let currentTimePeriod = 'week';
-        let typeChart, categoryChart, statusChart, timelineChart;
+        let typeChart, categoryChart, timelineChart, claimedItemsChart;
 
         // Initialize charts
         function initCharts() {
@@ -386,7 +386,7 @@
             typeChart = new Chart(typeCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Lost', 'Found'],
+                    labels: ['Lost Items', 'Found Items'],
                     datasets: [{
                         data: [0, 0],
                         backgroundColor: [
@@ -406,7 +406,7 @@
                         datalabels: {
                             formatter: (value, ctx) => {
                                 let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                                let percentage = (value * 100 / sum).toFixed(1) + '%';
+                                let percentage = sum > 0 ? (value * 100 / sum).toFixed(1) + '%' : '0%';
                                 return percentage;
                             },
                             color: '#fff',
@@ -448,44 +448,6 @@
                 }
             });
 
-            // Status Chart (Pie)
-            const statusCtx = document.getElementById('statusChart').getContext('2d');
-            statusChart = new Chart(statusCtx, {
-                type: 'pie',
-                data: {
-                    labels: ['Claimed'],
-                    datasets: [{
-                        data: [0, 0],
-                        backgroundColor: [
-                            '#f39c12',
-                            '#2ecc71'
-                        ],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        },
-                        datalabels: {
-                            formatter: (value, ctx) => {
-                                let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                                let percentage = (value * 100 / sum).toFixed(1) + '%';
-                                return percentage;
-                            },
-                            color: '#fff',
-                            font: {
-                                weight: 'bold'
-                            }
-                        }
-                    }
-                },
-                plugins: [ChartDataLabels]
-            });
-
             // Timeline Chart (Line)
             const timelineCtx = document.getElementById('timelineChart').getContext('2d');
             timelineChart = new Chart(timelineCtx, {
@@ -521,89 +483,135 @@
                     }
                 }
             });
+
+            // Claimed Items Chart (Doughnut)
+            const claimedItemsCtx = document.getElementById('claimedItemsChart').getContext('2d');
+            claimedItemsChart = new Chart(claimedItemsCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Claimed Lost Items', 'Claimed Found Items'],
+                    datasets: [{
+                        data: [0, 0],
+                        backgroundColor: [
+                            '#e74c3c',
+                            '#3498db'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        datalabels: {
+                            formatter: (value, ctx) => {
+                                let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                let percentage = sum > 0 ? (value * 100 / sum).toFixed(1) + '%' : '0%';
+                                return percentage;
+                            },
+                            color: '#fff',
+                            font: {
+                                weight: 'bold'
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
         }
 
-        // Load data from Firebase with proper claimed item tracking
+        // Load data from Firebase - all items
         function loadData() {
             const lostItemsRef = ref(db, 'lostItems');
             const foundItemsRef = ref(db, 'foundItems');
             const claimedItemsRef = ref(db, 'claimedItems');
 
+            // Load lost items
             onValue(lostItemsRef, (lostSnapshot) => {
+                // Load found items
                 onValue(foundItemsRef, (foundSnapshot) => {
+                    // Load claimed items
                     onValue(claimedItemsRef, (claimedSnapshot) => {
                         allItems = [];
-                        const claimedIds = new Set();
+                        claimedItems = [];
                         
-                        // First collect all claimed item IDs
-                        if (claimedSnapshot.exists()) {
-                            claimedSnapshot.forEach((childSnapshot) => {
-                                const claimedItem = childSnapshot.val();
-                                if (claimedItem.originalId) {
-                                    claimedIds.add(claimedItem.originalId);
-                                }
+                        // Process lost items
+                        if (lostSnapshot.exists()) {
+                            lostSnapshot.forEach((childSnapshot) => {
+                                const item = childSnapshot.val();
+                                item.id = childSnapshot.key;
+                                item.type = 'lost';
+                                allItems.push(item);
                             });
                         }
-
+                        
+                        // Process found items
+                        if (foundSnapshot.exists()) {
+                            foundSnapshot.forEach((childSnapshot) => {
+                                const item = childSnapshot.val();
+                                item.id = childSnapshot.key;
+                                item.type = 'found';
+                                allItems.push(item);
+                            });
+                        }
+                        
                         // Process claimed items
                         if (claimedSnapshot.exists()) {
                             claimedSnapshot.forEach((childSnapshot) => {
                                 const item = childSnapshot.val();
                                 item.id = childSnapshot.key;
                                 item.type = item.originalType || 'unknown';
-                                item.status = 'claimed';
-                                allItems.push(item);
+                                claimedItems.push(item);
                             });
                         }
-
+                        
                         updateAnalytics();
                     });
                 });
             });
         }
 
-        // Update analytics with accurate counts
+        // Update analytics with all items
         function updateAnalytics() {
             // Filter items based on time period
             let filteredItems = filterItemsByTimePeriod(allItems, currentTimePeriod);
             let previousPeriodItems = filterItemsByTimePeriod(allItems, getPreviousPeriod(currentTimePeriod));
+            let filteredClaimedItems = filterItemsByTimePeriod(claimedItems, currentTimePeriod);
 
-            // Calculate accurate stats
-            const totalUnclaimedItems = filteredItems.filter(item => item.status !== 'claimed').length;
-            const lostItems = filteredItems.filter(item => item.type === 'lost' && item.status !== 'claimed').length;
-            const foundItems = filteredItems.filter(item => item.type === 'found' && item.status !== 'claimed').length;
-            const claimedItems = filteredItems.filter(item => item.status === 'claimed').length;
+            // Calculate stats
+            const totalItems = filteredItems.length;
+            const lostItems = filteredItems.filter(item => item.type === 'lost').length;
+            const foundItems = filteredItems.filter(item => item.type === 'found').length;
             
-            // Calculate claim rate based on all found items (claimed + unclaimed)
-            const totalFoundItems = allItems.filter(item => item.type === 'found').length;
-            const totalClaimedFromFound = allItems.filter(item => item.type === 'found' && item.status === 'claimed').length;
-            const claimRate = totalFoundItems > 0 ? Math.round((totalClaimedFromFound / totalFoundItems) * 100) : 0;
+            // Calculate claim rate (percentage of claimed items out of total items)
+            const claimRate = totalItems > 0 ? 
+                Math.round((filteredClaimedItems.length / totalItems) * 100) : 0;
 
             // Previous period stats for comparison
-            const prevTotalItems = previousPeriodItems.filter(item => item.status !== 'claimed').length;
-            const prevLostItems = previousPeriodItems.filter(item => item.type === 'lost' && item.status !== 'claimed').length;
-            const prevFoundItems = previousPeriodItems.filter(item => item.type === 'found' && item.status !== 'claimed').length;
-            const prevTotalFoundItems = previousPeriodItems.filter(item => item.type === 'found').length;
-            const prevClaimedFromFound = previousPeriodItems.filter(item => item.type === 'found' && item.status === 'claimed').length;
-            const prevClaimRate = prevTotalFoundItems > 0 ? Math.round((prevClaimedFromFound / prevTotalFoundItems) * 100) : 0;
-
+            const prevTotalItems = previousPeriodItems.length;
+            const prevLostItems = previousPeriodItems.filter(item => item.type === 'lost').length;
+            const prevFoundItems = previousPeriodItems.filter(item => item.type === 'found').length;
+            
             // Update stat cards
-            document.getElementById('totalItems').textContent = totalUnclaimedItems;
+            document.getElementById('totalItems').textContent = totalItems;
             document.getElementById('lostItems').textContent = lostItems;
             document.getElementById('foundItems').textContent = foundItems;
             document.getElementById('claimRate').textContent = claimRate + '%';
 
             // Update change indicators
-            updateChangeIndicator('totalItemsChange', totalUnclaimedItems, prevTotalItems);
+            updateChangeIndicator('totalItemsChange', totalItems, prevTotalItems);
             updateChangeIndicator('lostItemsChange', lostItems, prevLostItems);
             updateChangeIndicator('foundItemsChange', foundItems, prevFoundItems);
-            updateChangeIndicator('claimRateChange', claimRate, prevClaimRate);
+            updateChangeIndicator('claimRateChange', claimRate, 0); // No previous claim rate data
 
-            // Update charts with accurate data
+            // Update charts
             updateTypeChart(filteredItems);
             updateCategoryChart(filteredItems);
-            updateStatusChart(filteredItems);
             updateTimelineChart(filteredItems);
+            updateClaimedItemsChart(filteredClaimedItems);
             updateRecentActivity(filteredItems);
         }
 
@@ -645,23 +653,29 @@
             }
         }
 
-        // Update type chart
+        // Update type chart - all items
         function updateTypeChart(items) {
-            const lostCount = items.filter(item => item.type === 'lost' && item.status !== 'claimed').length;
-            const foundCount = items.filter(item => item.type === 'found' && item.status !== 'claimed').length;
+            const lostCount = items.filter(item => item.type === 'lost').length;
+            const foundCount = items.filter(item => item.type === 'found').length;
             
             typeChart.data.datasets[0].data = [lostCount, foundCount];
             typeChart.update();
         }
 
-        // Update category chart
-        function updateCategoryChart(items) {
-            // Only include unclaimed items in category chart
-            const unclaimedItems = items.filter(item => item.status !== 'claimed');
+        // Update claimed items chart
+        function updateClaimedItemsChart(items) {
+            const claimedLostCount = items.filter(item => item.type === 'lost').length;
+            const claimedFoundCount = items.filter(item => item.type === 'found').length;
             
+            claimedItemsChart.data.datasets[0].data = [claimedLostCount, claimedFoundCount];
+            claimedItemsChart.update();
+        }
+
+        // Update category chart - all items
+        function updateCategoryChart(items) {
             // Group by category
             const categoryCounts = {};
-            unclaimedItems.forEach(item => {
+            items.forEach(item => {
                 const category = item.category || 'Uncategorized';
                 categoryCounts[category] = (categoryCounts[category] || 0) + 1;
             });
@@ -677,16 +691,7 @@
             categoryChart.update();
         }
 
-        // Update status chart
-        function updateStatusChart(items) {
-            const unclaimedCount = items.filter(item => item.status !== 'claimed').length;
-            const claimedCount = items.filter(item => item.status === 'claimed').length;
-            
-            statusChart.data.datasets[0].data = [unclaimedCount, claimedCount];
-            statusChart.update();
-        }
-
-        // Update timeline chart
+        // Update timeline chart - all items
         function updateTimelineChart(items) {
             // Group by date based on current time period
             const dateGroups = {};
@@ -746,16 +751,14 @@
                 }
             }
             
-            // Count items per date (only unclaimed items)
+            // Count items per date
             items.forEach(item => {
-                if (item.status !== 'claimed') {
-                    const dateStr = new Date(item.timestamp || item.dateLost || item.dateFound || item.dateClaimed).toLocaleDateString(undefined, dateFormat);
-                    if (dateGroups[dateStr]) {
-                        if (item.type === 'lost') {
-                            dateGroups[dateStr].lost++;
-                        } else if (item.type === 'found') {
-                            dateGroups[dateStr].found++;
-                        }
+                const dateStr = new Date(item.timestamp).toLocaleDateString(undefined, dateFormat);
+                if (dateGroups[dateStr]) {
+                    if (item.type === 'lost') {
+                        dateGroups[dateStr].lost++;
+                    } else if (item.type === 'found') {
+                        dateGroups[dateStr].found++;
                     }
                 }
             });
@@ -773,12 +776,12 @@
             timelineChart.update();
         }
 
-        // Update recent activity table
+        // Update recent activity table - all items
         function updateRecentActivity(items) {
             // Sort by timestamp (newest first)
             const sortedItems = [...items].sort((a, b) => {
-                const dateA = new Date(a.timestamp || a.dateLost || a.dateFound || a.dateClaimed);
-                const dateB = new Date(b.timestamp || b.dateLost || b.dateFound || b.dateClaimed);
+                const dateA = new Date(a.timestamp);
+                const dateB = new Date(b.timestamp);
                 return dateB - dateA;
             }).slice(0, 10); // Take top 10
             
@@ -788,14 +791,13 @@
             
             sortedItems.forEach(item => {
                 const row = document.createElement('tr');
-                const date = new Date(item.timestamp || item.dateLost || item.dateFound || item.dateClaimed);
+                const date = new Date(item.timestamp);
                 const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 
                 row.innerHTML = `
                     <td>${dateStr}</td>
                     <td>${item.itemName || 'Unnamed Item'}</td>
                     <td><span class="badge ${item.type === 'lost' ? 'badge-lost' : 'badge-found'}">${item.type === 'lost' ? 'Lost' : 'Found'}</span></td>
-                    <td><span class="badge ${item.status === 'claimed' ? 'badge-claimed' : (item.type === 'lost' ? 'badge-lost' : 'badge-found')}">${item.status === 'claimed' ? 'Claimed' : 'Unclaimed'}</span></td>
                     <td>${item.location || 'Unknown'}</td>
                 `;
                 
@@ -825,12 +827,48 @@
                     startDate = new Date(now);
                     startDate.setFullYear(startDate.getFullYear() - 1);
                     break;
+                case 'week-prev':
+                    startDate = new Date(now);
+                    startDate.setDate(startDate.getDate() - 14);
+                    const endDate = new Date(now);
+                    endDate.setDate(endDate.getDate() - 7);
+                    return items.filter(item => {
+                        const itemDate = new Date(item.timestamp || item.dateClaimed);
+                        return itemDate >= startDate && itemDate < endDate;
+                    });
+                case 'month-prev':
+                    startDate = new Date(now);
+                    startDate.setMonth(startDate.getMonth() - 2);
+                    const endDateMonth = new Date(now);
+                    endDateMonth.setMonth(endDateMonth.getMonth() - 1);
+                    return items.filter(item => {
+                        const itemDate = new Date(item.timestamp || item.dateClaimed);
+                        return itemDate >= startDate && itemDate < endDateMonth;
+                    });
+                case 'quarter-prev':
+                    startDate = new Date(now);
+                    startDate.setMonth(startDate.getMonth() - 6);
+                    const endDateQuarter = new Date(now);
+                    endDateQuarter.setMonth(endDateQuarter.getMonth() - 3);
+                    return items.filter(item => {
+                        const itemDate = new Date(item.timestamp || item.dateClaimed);
+                        return itemDate >= startDate && itemDate < endDateQuarter;
+                    });
+                case 'year-prev':
+                    startDate = new Date(now);
+                    startDate.setFullYear(startDate.getFullYear() - 2);
+                    const endDateYear = new Date(now);
+                    endDateYear.setFullYear(endDateYear.getFullYear() - 1);
+                    return items.filter(item => {
+                        const itemDate = new Date(item.timestamp || item.dateClaimed);
+                        return itemDate >= startDate && itemDate < endDateYear;
+                    });
                 default:
                     return items; // All time
             }
             
             return items.filter(item => {
-                const itemDate = new Date(item.timestamp || item.dateLost || item.dateFound || item.dateClaimed);
+                const itemDate = new Date(item.timestamp || item.dateClaimed);
                 return itemDate >= startDate;
             });
         }
@@ -874,8 +912,6 @@
         });
 
         // Make functions available globally
-        window.showContactModal = showContactModal;
-        window.closeModal = closeModal;
         window.changeTimePeriod = changeTimePeriod;
     </script>
 
@@ -886,19 +922,6 @@
         }
 
         // Close modal when clicking outside
-        document.getElementById('contactModal').addEventListener('click', (e) => {
-            if (e.target === document.getElementById('contactModal')) {
-                closeModal();
-            }
-        });
-
-        // Show contact modal (dummy function - implement as needed)
-        function showContactModal(item) {
-            console.log("Show contact modal for item:", item);
-            // Implement your modal display logic here
-        }
-
-        // Close modal (dummy function - implement as needed)
         function closeModal() {
             console.log("Close modal");
             // Implement your modal close logic here
