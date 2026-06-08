@@ -94,63 +94,31 @@
         
         <button class="btn-login" onclick="signUp()">Sign Up</button>
 
-        <a class="sign-link" href="index.html" style="display:block; margin-top:15px; color:#5138ee;">Back to Login</a>
+        <a href="index.html" style="display:block; margin-top:15px; color:#5138ee;">Back to Login</a>
     </div>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword } 
             from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-        import { getDatabase, ref, set, get } 
+        import { getDatabase, ref, set } 
             from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
 
+        // ✅ NEW Firebase Configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBqf6biwARQaJS2D-Wdw5313hITDMKCvjo",
-            authDomain: "lostandfound-352d6.firebaseapp.com",
-            databaseURL: "https://lostandfound-352d6-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "lostandfound-352d6",
-            storageBucket: "lostandfound-352d6.appspot.com",
-            messagingSenderId: "188690377553",
-            appId: "1:188690377553:web:b8c81d5625cc974e394170"
+            apiKey: "AIzaSyCOZZ44tcqI8TPCXK6SzT7tURKM01j7efo",
+            authDomain: "lostnfounditemlostdb.firebaseapp.com",
+            databaseURL: "https://lostnfounditemlostdb-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "lostnfounditemlostdb",
+            storageBucket: "lostnfounditemlostdb.appspot.com",
+            messagingSenderId: "494153480103",
+            appId: "1:494153480103:web:e04aef1eab4e89cdb5a882"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const database = getDatabase(app);
 
-        // ✅ Create Default Admin Account (One-time)
-        async function createDefaultAdmin() {
-            const adminEmail = "admin@lostnfound.com";
-            const adminPassword = "admin123456";
-            
-            try {
-                const adminRef = ref(database, 'users/admin');
-                const snapshot = await get(adminRef);
-                
-                if (!snapshot.exists()) {
-                    // Create admin user
-                    const userCredential = await createUserWithEmailAndPassword(auth, adminEmail, adminPassword);
-                    const user = userCredential.user;
-                    
-                    await set(ref(database, 'users/' + user.uid), {
-                        idNumber: "ADMIN001",
-                        fullName: "System Administrator",
-                        email: adminEmail,
-                        role: "admin",
-                        createdAt: new Date().toISOString()
-                    });
-                    
-                    console.log("✅ Default Admin Account Created!");
-                }
-            } catch (e) {
-                console.log("Admin already exists or error:", e.message);
-            }
-        }
-
-        // Call this when page loads
-        createDefaultAdmin();
-
-        // ✅ Student Sign Up Function
         window.signUp = async function() {
             const fullName = document.getElementById("fullName").value.trim();
             const idNumber = document.getElementById("signupIdNumber").value.trim();
