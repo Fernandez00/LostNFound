@@ -94,17 +94,16 @@
         
         <button class="btn-login" onclick="signUp()">Sign Up</button>
 
-        <a class="sign-link" href="index.html">Back to Login</a>
+        <a class="sign-link" href="index.html" style="display:block; margin-top:15px; color:#5138ee;">Back to Login</a>
     </div>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword } 
             from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-        import { getDatabase, ref, set } 
+        import { getDatabase, ref, set, get } 
             from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
 
-        // ✅ Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBqf6biwARQaJS2D-Wdw5313hITDMKCvjo",
             authDomain: "lostandfound-352d6.firebaseapp.com",
@@ -119,53 +118,78 @@
         const auth = getAuth(app);
         const database = getDatabase(app);
 
-        // ✅ Sign Up Function (Stores Full Name & ID Number)
-        window.signUp = function() {
-            const fullName = document.getElementById("fullName").value;
-            const idNumber = document.getElementById("signupIdNumber").value;
+        // ✅ Create Default Admin Account (One-time)
+        async function createDefaultAdmin() {
+            const adminEmail = "admin@lostnfound.com";
+            const adminPassword = "admin123456";
+            
+            try {
+                const adminRef = ref(database, 'users/admin');
+                const snapshot = await get(adminRef);
+                
+                if (!snapshot.exists()) {
+                    // Create admin user
+                    const userCredential = await createUserWithEmailAndPassword(auth, adminEmail, adminPassword);
+                    const user = userCredential.user;
+                    
+                    await set(ref(database, 'users/' + user.uid), {
+                        idNumber: "ADMIN001",
+                        fullName: "System Administrator",
+                        email: adminEmail,
+                        role: "admin",
+                        createdAt: new Date().toISOString()
+                    });
+                    
+                    console.log("✅ Default Admin Account Created!");
+                }
+            } catch (e) {
+                console.log("Admin already exists or error:", e.message);
+            }
+        }
+
+        // Call this when page loads
+        createDefaultAdmin();
+
+        // ✅ Student Sign Up Function
+        window.signUp = async function() {
+            const fullName = document.getElementById("fullName").value.trim();
+            const idNumber = document.getElementById("signupIdNumber").value.trim();
             const password = document.getElementById("signupPassword").value;
             const confirmPassword = document.getElementById("confirmPassword").value;
 
-            if (!fullName) {
-                alert("❌ Please enter your full name.");
-                return;
-            }
-            if (!idNumber) {
-                alert("❌ Please enter your ID Number.");
-                return;
-            }
-            if (password !== confirmPassword) {
-                alert("❌ Passwords do not match!");
-                return;
-            }
+            if (!fullName) return alert("❌ Please enter your full name.");
+            if (!idNumber) return alert("❌ Please enter your ID Number.");
+            if (password.length < 6) return alert("❌ Password must be at least 6 characters.");
+            if (password !== confirmPassword) return alert("❌ Passwords do not match!");
 
-            // ✅ Firebase requires an email, so we create a unique one
-            const email = `${idNumber}@example.com`;
+            const email = `${idNumber}@lostnfound.example.com`;
 
-            createUserWithEmailAndPassword(auth, email, password)
-                .then(userCredential => {
-                    const user = userCredential.user;
-                    const userId = user.uid;  // Get unique Firebase UID
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
 
-                    // ✅ Save Student Data in Realtime Database
-                    return set(ref(database, 'users/' + userId), { 
-                        idNumber, 
-                        fullName, 
-                        email,
-                        role: "student" 
-                    });
-                })
-                .then(() => {
-                    alert(`✅ Account created successfully!`);
-                    window.location.href = "index.html"; // Redirect to login after signup
-                })
-                .catch(error => {
-                    alert("❌ Error: " + error.message);
+                await set(ref(database, 'users/' + user.uid), {
+                    idNumber: idNumber,
+                    fullName: fullName,
+                    email: email,
+                    role: "student",
+                    createdAt: new Date().toISOString()
                 });
+
+                alert("✅ Account created successfully!");
+                window.location.href = "index.html";
+
+            } catch (error) {
+                console.error(error);
+                if (error.code === 'auth/email-already-in-use') {
+                    alert("❌ This ID Number is already registered.");
+                } else {
+                    alert("❌ Error: " + error.message);
+                }
+            }
         };
 
-       // ✅ Password Show/Hide Function
-       window.togglePassword = function(inputId, button) {
+        window.togglePassword = function(inputId, button) {
             const input = document.getElementById(inputId);
             if (input.type === "password") {
                 input.type = "text";
