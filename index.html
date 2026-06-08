@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Authentication System</title>
+    <title>Login - Lost & Found</title>
     <link rel="icon" type="image/png" href="/LNF.jpg">
     <style>
         body {
@@ -109,101 +109,70 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword } 
             from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-        import { getDatabase, ref, get } 
+        import { getDatabase, ref, get, child } 
             from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
     
-        // Firebase Configuration
+        // ✅ Your Firebase Configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBqf6biwARQaJS2D-Wdw5313hITDMKCvjo",
-            authDomain: "lostandfound-352d6.firebaseapp.com",
-            databaseURL: "https://lostandfound-352d6-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "lostandfound-352d6",
-            storageBucket: "lostandfound-352d6.appspot.com",
-            messagingSenderId: "188690377553",
-            appId: "1:188690377553:web:b8c81d5625cc974e394170"
+            apiKey: "AIzaSyCOZZ44tcqI8TPCXK6SzT7tURKM01j7efo",
+            authDomain: "lostnfounditemlostdb.firebaseapp.com",
+            databaseURL: "https://lostnfounditemlostdb-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "lostnfounditemlostdb",
+            storageBucket: "lostnfounditemlostdb.appspot.com",
+            messagingSenderId: "494153480103",
+            appId: "1:494153480103:web:e04aef1eab4e89cdb5a882"
         };
     
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const database = getDatabase(app);
     
-        // Login Function
-        window.login = function() {
-            const idOrEmail = document.getElementById("loginIdNumber").value.trim();
+        // ✅ Fixed Login Function
+        window.login = async function() {
+            let input = document.getElementById("loginIdNumber").value.trim();
             const password = document.getElementById("loginPassword").value.trim();
-    
-            if (!idOrEmail || !password) {
-                alert("❌ Please enter both ID Number/Email and Password.");
-                return;
+
+            if (!input || !password) {
+                return alert("❌ Please enter ID Number/Email and Password");
             }
-    
-            if (idOrEmail === "admin123@gmail.com") {
-                // Admin Login
-                signInWithEmailAndPassword(auth, idOrEmail, password)
-                    .then(() => {
-                        // Store admin info in sessionStorage
-                        sessionStorage.setItem('user', JSON.stringify({
-                            name: "Admin",
-                            role: "admin",
-                            email: idOrEmail
-                        }));
+
+            let email = input;
+            if (!input.includes('@')) {
+                email = `${input}@lostnfound.example.com`;
+            }
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                const snapshot = await get(child(ref(database), `users/${user.uid}`));
+                
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    sessionStorage.setItem('user', JSON.stringify(userData));
+
+                    if (userData.role === "admin" || email.includes("admin@lostnfound.com")) {
+                        alert("✅ Welcome Admin!");
                         window.location.href = "admin.html";
-                    })
-                    .catch(error => {
-                        alert("❌ Error: " + error.message);
-                    });
-
-            } else {
-                // Student Login (Use Fake Email)
-                const email = `${idOrEmail}@example.com`;
-    
-                signInWithEmailAndPassword(auth, email, password)
-                    .then(userCredential => {
-                        const usersRef = ref(database, "users");
-    
-                        get(usersRef).then(snapshot => {
-                            if (snapshot.exists()) {
-                                let foundUser = null;
-
-                                snapshot.forEach(childSnapshot => {
-                                    const userData = childSnapshot.val();
-                                    if (userData.idNumber === idOrEmail) {
-                                        foundUser = userData;
-                                    }
-                                });
-
-                                if (foundUser) {
-                                    if (foundUser.role === "student") {
-                                        // Store student info in sessionStorage
-                                        sessionStorage.setItem('user', JSON.stringify({
-                                            name: foundUser.fullName,
-                                            role: "student",
-                                            idNumber: foundUser.idNumber,
-                                            email: foundUser.email
-                                        }));
-                                        window.location.href = "student.html";
-                                    } else {
-                                        alert("❌ Role mismatch! Please contact admin.");
-                                    }
-                                } else {
-                                    alert("❌ No matching ID found! Make sure you signed up correctly.");
-                                }
-                            } else {
-                                alert("❌ No users found in the database.");
-                            }
-                        }).catch(error => {
-                            console.error("Error fetching user data:", error);
-                            alert("❌ Error retrieving user role.");
-                        });
-                    })
-                    .catch(error => {
-                        alert("❌ Login failed: " + error.message);
-                    });
+                    } else {
+                        alert("✅ Welcome Student!");
+                        window.location.href = "student.html";
+                    }
+                } else {
+                    alert("❌ User profile not found.");
+                }
+            } catch (error) {
+                console.error(error);
+                if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+                    alert("❌ Incorrect password. Please try again.");
+                } else if (error.code === 'auth/user-not-found') {
+                    alert("❌ Account not found. Please sign up first.");
+                } else {
+                    alert("❌ Login failed: " + error.message);
+                }
             }
         };
 
-        // Password Show/Hide Function
         window.togglePassword = function(inputId, button) {
             const input = document.getElementById(inputId);
             if (input.type === "password") {
