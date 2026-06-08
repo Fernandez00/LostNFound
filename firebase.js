@@ -43,35 +43,52 @@ window.signUp = function() {
 };
 
 // ✅ Function to Log In Users and Redirect Based on Role
-window.login = function() {
-    const email = document.getElementById("loginEmail").value;
-    const password = document.getElementById("loginPassword").value;
+window.login = async function() {
+    let input = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value.trim();
 
-    signInWithEmailAndPassword(auth, email, password)
-        .then(userCredential => {
-            const userId = userCredential.user.uid;
+    if (!input || !password) {
+        return alert("❌ Please enter your ID Number or Email and Password");
+    }
 
-            // ✅ Check User Role from Firebase
-            get(child(ref(database), `users/${userId}`)).then(snapshot => {
-                if (snapshot.exists()) {
-                    const userData = snapshot.val();
-                    if (userData.role === "admin") {
-                        alert("✅ Welcome Admin!");
-                        window.location.href = "admin.html";  // Redirect to admin page
-                    } else {
-                        alert("✅ Welcome Customer!");
-                        window.location.href = "customer.html";  // Redirect to customer page
-                    }
-                } else {
-                    alert("❌ No role found!");
-                }
-            }).catch(error => {
-                console.error("❌ Error fetching role:", error);
-            });
-        })
-        .catch(error => {
-            alert("❌ Error: " + error.message);
-        });
+    // Convert ID Number to email format if user entered only ID
+    let email = input;
+    if (!input.includes('@')) {
+        email = `${input}@lostnfound.example.com`;
+    }
+
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Get user data
+        const snapshot = await get(child(ref(database), `users/${user.uid}`));
+        
+        if (snapshot.exists()) {
+            const userData = snapshot.val();
+            
+            if (userData.role === "admin" || email === "admin@lostnfound.com") {
+                alert("✅ Welcome Admin!");
+                window.location.href = "admin.html";
+            } else {
+                alert("✅ Welcome Student!");
+                window.location.href = "student.html";
+            }
+        } else {
+            alert("❌ User data not found. Please contact admin.");
+        }
+    } catch (error) {
+        console.error(error);
+        if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+            alert("❌ Incorrect password.");
+        } else if (error.code === 'auth/user-not-found') {
+            alert("❌ No account found with this ID Number or Email.");
+        } else if (error.code === 'auth/invalid-email') {
+            alert("❌ Invalid email format. Try using your ID Number only.");
+        } else {
+            alert("❌ Login failed: " + error.message);
+        }
+    }
 };
 
 // ✅ Function to Log Out
